@@ -9,7 +9,6 @@ import storm.trident.TridentState;
 import storm.trident.Stream;
 import storm.trident.fluent.GroupedStream;
 
-////
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
@@ -21,12 +20,6 @@ import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.generated.AuthorizationException;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.generated.StormTopology;
-//import backtype.storm.topology.OutputFieldsDeclarer;
-//import backtype.storm.topology.TopologyBuilder;
-//import backtype.storm.topology.base.BaseRichBolt;
-//import backtype.storm.task.OutputCollector;
-//import backtype.storm.task.TopologyContext;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +30,10 @@ import com.echat.storm.analysis.constant.*;
 import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.operation.*;
 import com.echat.storm.analysis.spout.*;
-//import com.echat.storm.analysis.state.*;
+import com.echat.storm.analysis.state.*;
 
 public class AnalysisTopology {
-	private static final Logger log = LoggerFactory.getLogger(AnalysisTopology.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnalysisTopology.class);
 
 	private static StormTopology buildTopology() {
 		TridentTopology topology = new TridentTopology();
@@ -61,16 +54,24 @@ public class AnalysisTopology {
 			.parallelismHint(EnvConstant.KAFKA_TOPIC_PARTITION); 
 
 
+		// setup user action stream
 		Stream actionStream = logStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
-				new EventFilter())
+				new FieldFilter(FieldConstant.EVENT_FIELD))
 			.partitionBy(new Fields(FieldConstant.UID_FIELD))
-			.each(new Fields(FieldConstant.UID_FIELD),
+			.each(
+				new Fields(FieldConstant.UID_FIELD),
 				new CompleteOrganizationByUID(RedisConfig.defaultConfig()),
 				CompleteOrganizationByUID.getOutputFields())
 			.project(UserActionEvent.getFields());
 		
+		// persist user action event to hbase
+		actionStream.partitionPersist(
+				new BaseState.Factory().withHBase(new HBaseConfig()),
+				UserActionEvent.getFields(),
+				new UserActionHBaseUpdater());
 
+		
 		/*
 		// store to hbase
 		actionStream.partitionPersist(

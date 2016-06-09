@@ -10,10 +10,6 @@ import com.echat.storm.analysis.constant.FieldConstant;
 public class EventFilter extends BaseFilter {
 	private final String[] events;
 
-	public EventFilter() {
-		events = null;
-	}
-
 	public EventFilter(String event) {
 		this.events = new String[]{ event };
 	}
@@ -27,14 +23,10 @@ public class EventFilter extends BaseFilter {
 		if( tuple.contains(FieldConstant.EVENT_FIELD) ) {
 			final String event = tuple.getStringByField(FieldConstant.EVENT_FIELD);
 			if( event != null ) {
-				if( events != null ) {
-					for(String ev : events) {
-						if( ev.equals(event) ) {
-							return true;
-						}
+				for(String ev : events) {
+					if( ev.equals(event) ) {
+						return true;
 					}
-				} else {
-					return true;
 				}
 			}
 		}

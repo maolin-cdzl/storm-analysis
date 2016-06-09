@@ -48,12 +48,13 @@ public class CompleteOrganizationByUID extends BaseFunction {
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		final String uid = tuple.getString(0);
 		final OrganizationInfo info = search(uid);
-		if( info == null ) {
-			logger.warn("Can not found OrganizationInfo for " + uid);
-			collector.emit(new Values(null,null));
-		} else {
-			collector.emit(new Values(info.company,info.agent));
+		if( info != null ) {
+			if( info.company != null ) {
+				collector.emit(new Values(info.company,info.agent));
+				return;
+			}
 		}
+		logger.warn("Can not found OrganizationInfo for " + uid);
 	}
 
 

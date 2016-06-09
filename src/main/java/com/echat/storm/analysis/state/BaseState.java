@@ -14,7 +14,9 @@ import redis.clients.jedis.JedisPool;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.HConnection;
+import org.apache.hadoop.hbase.client.HConnectionManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -73,7 +75,9 @@ public class BaseState implements State {
     }
 
     private JedisPool jedisPool;
+	private HBaseConfig hbaseCustomConfig;
 	private Configuration hbaseConfiguration;
+	private HConnection hbaseConnection;
 	private Gson gson;
 	private LRUHashMap<String,Long> timelineMap;
 
@@ -82,8 +86,9 @@ public class BaseState implements State {
 			jedisPool = new JedisPool(DEFAULT_POOL_CONFIG,redisConf.host,redisConf.port);
 		}
 		if( hbaseConf != null ) {
+			hbaseCustomConfig = hbaseConf;
 			hbaseConfiguration = HBaseConfiguration.create();
-			//TODO:
+			hbaseConnection = null;
 		}
 		if( timelineCacheSize != 0 ) {
 			timelineMap = new LRUHashMap<String,Long>(timelineCacheSize);
@@ -107,27 +112,49 @@ public class BaseState implements State {
         jedis.close();
     }
 
-	public HTable getHTable(final String tableName) {
+	private HConnection createHConnection() throws IOException {
+		return HConnectionManager.createConnection(hbaseConfiguration);
+	}
+
+	public HTableInterface getHTable(final String tableName) {
 		if( hbaseConfiguration == null ) {
 			throw new RuntimeException("Did not setup hbase configure");
 		}
 
-		HTable table = null;
+		HTableInterface table = null;
 		try {
-			table = new HTable(hbaseConfiguration,tableName);
+			if( hbaseConnection == null ) {
+				hbaseConnection = createHConnection();
+			}
+			table = hbaseConnection.getTable(tableName);
 		} catch( IOException e ) {
+			if( hbaseConnection != null ) {
+				try {
+					hbaseConnection.close();
+				} catch( IOException ee ) {
+				} finally {
+					hbaseConnection = null;
+				}
+			}
 			logger.error(e.getMessage());
 			return null;
 		}
 		return table;
 	}
-	public void returnHTable(HTable table) {
-		if( hbaseConfiguration == null ) {
-			throw new RuntimeException("Did not setup hbase configure");
-		}
+	public void returnHTable(HTableInterface table) {
 		try {
-			table.close();
+			if( table != null ) {
+				table.close();
+			}
 		} catch( IOException e ) {
+			if( hbaseConnection != null ) {
+				try {
+					hbaseConnection.close();
+				} catch( IOException ee ) {
+				} finally {
+					hbaseConnection = null;
+				}
+			}
 			logger.error(e.getMessage());
 		}
 	}

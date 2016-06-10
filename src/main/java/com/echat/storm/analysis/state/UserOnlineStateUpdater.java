@@ -127,7 +127,8 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 					HTableInterface table = state.getHTable(HBaseConstant.USER_SESSION_TABLE);
 					if( table != null ) {
 						try {
-							table.batch(puts);
+							Object[] result = new Object[puts.size()];
+							table.batch(puts,result);
 						} catch (InterruptedException e) {
 							logger.error("Error performing put sessions to HBase.", e);
 						} catch (IOException e) {

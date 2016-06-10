@@ -35,9 +35,6 @@ import com.echat.storm.analysis.utils.*;
 public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 	private static final Logger logger = LoggerFactory.getLogger(UserActionHBaseUpdater.class);
 
-	private HTableInterface _table = null;
-
-
 	@Override
 	public void updateState(BaseState state, List<TridentTuple> inputs,TridentCollector collector) {
 		List<Put> puts = new ArrayList<Put>();
@@ -46,7 +43,7 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 			UserActionEvent ev = UserActionEvent.fromTuple(tuple);
 			puts.add(ev.toRow());
 		}
-		HTableInterface table = getHTable(state);
+		HTableInterface table = state.getHTable();
 		if( table == null ) {
 			logger.error("Can not get htable instance");
 			return;
@@ -56,23 +53,12 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
             table.batch(puts, result);
         } catch (InterruptedException e) {
             logger.error("Error performing a put to HBase.", e);
-			returnHTable(state);
         } catch (IOException e) {
             logger.error("Error performing a put to HBase.", e);
-			returnHTable(state);
-        }
-	}
-
-	private HTableInterface getHTable(BaseState state) {
-		if( _table == null ) {
-			_table = state.getHTable(HBaseConstant.USER_ACTION_TABLE);
-		}
-		return _table;
-	}
-	private void returnHTable(BaseState state) {
-		if( _table != null ) {
-			state.returnHTable(_table);
-			_table = null;
+        } finally {
+			if( table != null ) {
+				state.returnHTable(_table);
+			}
 		}
 	}
 }

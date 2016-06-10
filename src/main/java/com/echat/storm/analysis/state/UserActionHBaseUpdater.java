@@ -65,7 +65,7 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 
 	private HTableInterface getHTable(BaseState state) {
 		if( _table == null ) {
-			_table = state.getHTable("test");
+			_table = state.getHTable(HBaseConstant.USER_ACTION_TABLE);
 		}
 		return _table;
 	}

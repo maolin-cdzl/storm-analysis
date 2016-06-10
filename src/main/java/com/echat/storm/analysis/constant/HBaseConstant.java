@@ -5,8 +5,13 @@ public class HBaseConstant {
 	public static final String USER_ACTION_TABLE = "user_action";
 	public static final byte[] COLUMN_FAMILY_LOG = "l".getBytes();
 
+	// user online session table
+	public static final String USER_SESSION_TABLE = "user_session";
+
 	// broken history table
 	public static final String BROKEN_HISTORY_TABLE = "broken_history";
+
+	
 
 	// columns
 	public static final byte[] COLUMN_SERVER = FieldConstant.SERVER_FIELD.getBytes();
@@ -29,6 +34,9 @@ public class HBaseConstant {
 	public static final byte[] COLUMN_COUNT = FieldConstant.COUNT_FIELD.getBytes();
 	public static final byte[] COLUMN_SW = FieldConstant.SW_FIELD.getBytes();
 	public static final byte[] COLUMN_VALUE = FieldConstant.VALUE_FIELD.getBytes();
+
+	public static final byte[] COLUMN_TIME_START = FieldConstant.TIME_START_FIELD.getBytes();
+	public static final byte[] COLUMN_TIME_END = FieldConstant.TIME_END_FIELD.getBytes();
 
 
 	public static final byte[] COLUMN_OFFLINE_TIME = FieldConstant.OFFLINE_TIME_FIELD.getBytes();

@@ -59,6 +59,12 @@ public class EventConstant {
 	// worksheet
 	public static final String EVENT_WORKSHEET_POST = "WORKSHEET_POST";
 
+
+	// user online event
+	public static final String EVENT_USER_ONLINE = "uon";
+	public static final String EVENT_USER_OFFLINE = "uoff";
+	public static final String EVENT_USER_BROKEN = "ubro";
+
 }
 
 

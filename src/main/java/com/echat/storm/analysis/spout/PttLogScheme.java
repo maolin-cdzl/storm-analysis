@@ -182,9 +182,9 @@ public class PttLogScheme implements Scheme {
 
 			// because current log time has no milliseconds!
 			try {
-				Date date = DateUtils.parseDate(mr.group(2),TopologyConstant.INPUT_DATETIME_FORMAT);
+				Date date = TopologyConstant.widelyParseDatetime(mr.group(2));
 				Long millis = (Long.parseLong(mr.group(3)) / 100L) % 1000;
-				log.datetime = DateFormatUtils.format(new Date(date.getTime() + millis),TopologyConstant.STD_DATETIME_FORMAT);
+				log.datetime = TopologyConstant.formatDatetime(date.getTime() + millis);
 			} catch( ParseException e ) {
 				logger.error("Bad datetime format");
 				return false;

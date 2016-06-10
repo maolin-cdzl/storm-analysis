@@ -31,6 +31,8 @@ public class FieldConstant {
 	public static final String TARGET_GOT_FIELD = "tar-got";
 	public static final String TARGET_DENT_FIELD = "tar-dent";
 
+	public static final String INTERVAL_FIELD = "interval";
+
 	public static final String LOAD_FIELD = "load";
 	public static final String SERVER_LOAD_FIELD = "server-load";
 	public static final String OFFLINE_TIME_FIELD = "offtime";

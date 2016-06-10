@@ -1,8 +1,6 @@
 package com.echat.storm.analysis.types;
 
 import java.util.Date;
-import java.text.ParseException;
-import org.apache.commons.lang.time.DateUtils;
 
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
@@ -115,11 +113,7 @@ public class PttSvcLog {
 	}
 
 	public Date getDate() {
-		try {
-			return DateUtils.parseDate(datetime,TopologyConstant.STD_INPUT_DATETIME_FORMAT);
-		} catch( ParseException e) {
-			throw new RuntimeException("Bad datetime format: " + datetime);
-		}
+		return TopologyConstant.parseDatetime(datetime);
 	}
 	public long getTimeStamp() {
 		if( timestamp == 0 ) {

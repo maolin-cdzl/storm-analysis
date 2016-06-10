@@ -112,11 +112,7 @@ public class UserActionEvent {
 	}
 
 	public Date getDate() {
-		try {
-			return DateUtils.parseDate(datetime,TopologyConstant.STD_INPUT_DATETIME_FORMAT);
-		} catch( ParseException e) {
-			throw new RuntimeException("Bad datetime format: " + datetime);
-		}
+		return TopologyConstant.parseDatetime(datetime);
 	}
 	public long getTimeStamp() {
 		if( timestamp == 0 ) {

@@ -18,9 +18,6 @@ import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HConnection;
 import org.apache.hadoop.hbase.client.HConnectionManager;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +39,9 @@ public class BaseState implements State {
 		logger.info("commit txid: " + txid.toString());
     }
 
-    public static class Factory implements StateFactory {
+    static public class Factory implements StateFactory {
         private RedisConfig _redisConfig = null;
 		private HBaseConfig _hbaseConfig = null;
-		private int _timelineCacheSize = 0;
-		private boolean _withGson = false;
 
 		public Factory withJedis(RedisConfig conf) {
 			_redisConfig = conf;
@@ -58,19 +53,9 @@ public class BaseState implements State {
 			return this;
 		}
 
-		public Factory withTimeline(int cacheSize) {
-			_timelineCacheSize = cacheSize;
-			return this;
-		}
-
-		public Factory withGson() {
-			_withGson = true;
-			return this;
-		}
-
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-            return new BaseState(_redisConfig,_hbaseConfig,_timelineCacheSize,_withGson);
+            return new BaseState(_redisConfig,_hbaseConfig);
         }
     }
 
@@ -78,10 +63,8 @@ public class BaseState implements State {
 	private HBaseConfig hbaseCustomConfig;
 	private Configuration hbaseConfiguration;
 	private HConnection hbaseConnection;
-	private Gson gson;
-	private LRUHashMap<String,Long> timelineMap;
 
-    public BaseState(RedisConfig redisConf,HBaseConfig hbaseConf,int timelineCacheSize,boolean withGson) {
+    public BaseState(RedisConfig redisConf,HBaseConfig hbaseConf) {
 		if( redisConf != null ) {
 			jedisPool = new JedisPool(DEFAULT_POOL_CONFIG,redisConf.host,redisConf.port);
 		}
@@ -90,22 +73,16 @@ public class BaseState implements State {
 			hbaseConfiguration = HBaseConfiguration.create();
 			hbaseConnection = null;
 		}
-		if( timelineCacheSize != 0 ) {
-			timelineMap = new LRUHashMap<String,Long>(timelineCacheSize);
-		}
-		if( withGson ) {
-			gson = new GsonBuilder().setDateFormat(TopologyConstant.STD_DATETIME_FORMAT).create();
-		}
     }
 
-    public Jedis getJedis() {
+    synchronized public Jedis getJedis() {
 		if( jedisPool == null ) {
 			throw new RuntimeException("Did not setup jedis configure");
 		}
         return jedisPool.getResource();
     }
 
-    public void returnJedis(Jedis jedis) {
+    synchronized public void returnJedis(Jedis jedis) {
 		if( jedisPool == null ) {
 			throw new RuntimeException("Did not setup jedis configure");
 		}
@@ -116,7 +93,7 @@ public class BaseState implements State {
 		return HConnectionManager.createConnection(hbaseConfiguration);
 	}
 
-	public HTableInterface getHTable(final String tableName) {
+	synchronized public HTableInterface getHTable(final String tableName) {
 		if( hbaseConfiguration == null ) {
 			throw new RuntimeException("Did not setup hbase configure");
 		}
@@ -141,7 +118,8 @@ public class BaseState implements State {
 		}
 		return table;
 	}
-	public void returnHTable(HTableInterface table) {
+
+	synchronized public void returnHTable(HTableInterface table) {
 		try {
 			if( table != null ) {
 				table.close();
@@ -158,64 +136,6 @@ public class BaseState implements State {
 			logger.error(e.getMessage());
 		}
 	}
-
-	public Gson getGson() {
-		if( gson == null ) {
-			throw new RuntimeException("Did not setup gson configure");
-		}
-		return gson;
-	}
-
-	public Long getTimeline(String type,String id) {
-		if( timelineMap == null ) {
-			throw new RuntimeException("Did not setup timeline configure");
-		}
-		final String key = type + id;
-		return timelineMap.get(key);
-	}
-
-	public boolean updateTimeline(String type,String id,Long tl) {
-		if( timelineMap == null ) {
-			throw new RuntimeException("Did not setup timeline configure");
-		}
-		final String key = type + id;
-		Long last = timelineMap.get(key);
-		if( last == null || last <= tl ) {
-			timelineMap.put(key,tl);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean isTooOld(String type,String id,Long tl) {
-		if( timelineMap == null ) {
-			throw new RuntimeException("Did not setup timeline configure");
-		}
-		final String key = type + id;
-		Long last = timelineMap.get(key);
-		if( last != null && last > tl ) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean timelineBefore(String id,String type1,String type2) {
-		if( timelineMap == null ) {
-			throw new RuntimeException("Did not setup timeline configure");
-		}
-		Long t1 = getTimeline(type1,id);
-		Long t2 = getTimeline(type2,id);
-		if( t2 == null ) {
-			return true;
-		} else if( t1 == null ) {
-			return false;
-		} else {
-			return t1 < t2;
-		}
-	}
-
 }
 
 

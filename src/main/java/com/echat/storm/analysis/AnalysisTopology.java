@@ -67,9 +67,18 @@ public class AnalysisTopology {
 		
 		// persist user action event to hbase
 		actionStream.partitionPersist(
-				new BaseState.Factory().withHBase(new HBaseConfig()),
+				new BaseState.Factory().withHBase(HBaseConfig.defaultConfig()),
 				UserActionEvent.getFields(),
 				new UserActionHBaseUpdater());
+
+		actionStream.each(
+				new Fields(FieldConstant.EVENT_FIELD),
+				new EventFilter(UserOnlineStateUpdater.getInputEvents()))
+			.partitionPersist(
+				new UserOnlineState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
+				UserActionEvent.getFields(),
+				new UserOnlineStateUpdater(),
+				UserOnlineEvent.getFields());
 
 		
 		/*

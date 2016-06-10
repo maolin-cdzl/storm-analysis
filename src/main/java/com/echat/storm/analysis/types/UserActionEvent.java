@@ -10,6 +10,11 @@ import backtype.storm.tuple.ITuple;
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.TopologyConstant;
 
+import org.apache.hadoop.hbase.client.Put;
+import com.echat.storm.analysis.utils.BytesUtil;
+
+import com.echat.storm.analysis.constant.*;
+
 public class UserActionEvent {
 	public String server;
 	public String datetime;
@@ -119,6 +124,73 @@ public class UserActionEvent {
 			timestamp = getDate().getTime();
 		}
 		return timestamp;
+	}
+
+	public Put toRow() {
+		Put row = new Put(rowKey());
+
+		// must exists column
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_SERVER,server.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_DATETIME,datetime.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_EVENT,event.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_UID,uid.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_COMPANY,company.getBytes());
+
+		if( agent != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_AGENT,agent.getBytes());
+		}
+		if( gid != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GID,gid.getBytes());
+		}
+		if( ctx != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_CTX,ctx.getBytes());
+		}
+		if( ip != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_IP,ip.getBytes());
+		}
+		if( device != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_DEVICE,device.getBytes());
+		}
+		if( devid != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_DEVICE_ID,devid.getBytes());
+		}
+		if( version != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_VERSION,version.getBytes());
+		}
+		if( imsi != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_IMSI,imsi.getBytes());
+		}
+		if( expect_payload != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_EXPECT_PAYLOAD,expect_payload.getBytes());
+		}
+		if( target != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_TARGET,target.getBytes());
+		}
+		if( target_got != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_TARGET_GOT,target_got.getBytes());
+		}
+		if( target_dent != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_TARGET_DENT,target_dent.getBytes());
+		}
+		if( count != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_COUNT,count.getBytes());
+		}
+		if( sw != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_SW,sw.getBytes());
+		}
+		if( value != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_VALUE,value.getBytes());
+		}
+		return row;
+	}
+
+	public byte[] rowKey() {
+		byte[] companyPart = BytesUtil.stringToHashBytes(company);
+		byte[] userPart = BytesUtil.stringToHashBytes(uid);
+		byte[] tsPart = BytesUtil.longToBytes(getTimeStamp());
+		byte[] evPart = BytesUtil.stringToHashBytes(event);
+
+		return BytesUtil.concatBytes(companyPart,userPart,tsPart,evPart);
 	}
 }
 

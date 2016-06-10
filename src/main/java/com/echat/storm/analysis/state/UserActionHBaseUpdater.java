@@ -43,7 +43,7 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 			UserActionEvent ev = UserActionEvent.fromTuple(tuple);
 			puts.add(ev.toRow());
 		}
-		HTableInterface table = state.getHTable();
+		HTableInterface table = state.getHTable(HBaseConstant.USER_ACTION_TABLE);
 		if( table == null ) {
 			logger.error("Can not get htable instance");
 			return;
@@ -57,7 +57,7 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
             logger.error("Error performing a put to HBase.", e);
         } finally {
 			if( table != null ) {
-				state.returnHTable(_table);
+				state.returnHTable(table);
 			}
 		}
 	}

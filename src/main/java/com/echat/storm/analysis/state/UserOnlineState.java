@@ -17,8 +17,6 @@ import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
 public class UserOnlineState extends BaseState {
-	private static final Logger logger = LoggerFactory.getLogger(UserOnlineStateUpdater.class);
-
 	public UserOnlineState(RedisConfig redisConf,HBaseConfig hbaseConf) {
 		super(redisConf,hbaseConf);
 	}

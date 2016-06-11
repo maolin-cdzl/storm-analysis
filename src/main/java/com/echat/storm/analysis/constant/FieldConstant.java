@@ -33,8 +33,9 @@ public class FieldConstant {
 
 	public static final String INTERVAL_FIELD = "interval";
 
-	public static final String GROUP_COMPANY_FIELD = "company";
-	public static final String GROUP_AGENT_FIELD = "agent";
+	public static final String GROUP_TYPE_FIELD = "gtype";
+	public static final String GROUP_COMPANY_FIELD = "gcompany";
+	public static final String GROUP_AGENT_FIELD = "gagent";
 
 	public static final String LOAD_FIELD = "load";
 	public static final String SERVER_LOAD_FIELD = "server-load";

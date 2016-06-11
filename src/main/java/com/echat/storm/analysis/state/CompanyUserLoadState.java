@@ -82,11 +82,13 @@ public class CompanyUserLoadState extends BaseState implements IUserLoadReportRe
 
 	@Override
 	public void onSecondReport(final String id,long bucket,UserLoadSecond report) {
+		/* not report company second statistic, too many.
 		reports.add(TimeBucketReport.makeReport(
 						id,
 						EventConstant.REPORT_USER_LOAD_SECOND,
 						bucket,
 						gson.toJson(report)));
+		*/
 	}
 
 	@Override

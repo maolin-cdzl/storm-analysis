@@ -17,8 +17,8 @@ import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.types.RedisConfig;
 import com.echat.storm.analysis.utils.LRUHashMap;
 
-public class CompleteOrganizationByGID extends BaseFunction {
-	private static final Logger logger = LoggerFactory.getLogger(CompleteOrganizationByGID.class);
+public class CompleteGroupEvent extends BaseFunction {
+	private static final Logger logger = LoggerFactory.getLogger(CompleteGroupEvent.class);
 	static private final int MAX_CACHE_COUNT = 10000;
 	static private final long TIMEOUT_MILLIS = 5 * 60 * 1000; // 5 minute
 
@@ -33,13 +33,16 @@ public class CompleteOrganizationByGID extends BaseFunction {
 	}
 
 	static public Fields getOutputFields() {
-		return new Fields(FieldConstant.GROUP_COMPANY_FIELD,FieldConstant.GROUP_AGENT_FIELD);
+		return new Fields(
+				FieldConstant.GROUP_TYPE_FIELD,
+				FieldConstant.GROUP_COMPANY_FIELD,
+				FieldConstant.GROUP_AGENT_FIELD);
 	}
 
     private Jedis jedis;
 	private LRUHashMap<String,TimedOrganizationInfo> cache;
 	
-	public CompleteOrganizationByGID(RedisConfig config) {
+	public CompleteGroupEvent(RedisConfig config) {
 		jedis = new Jedis(config.host,config.port,config.timeout);
 		cache = new LRUHashMap<String,TimedOrganizationInfo>(MAX_CACHE_COUNT);
 	}
@@ -47,14 +50,30 @@ public class CompleteOrganizationByGID extends BaseFunction {
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		final String gid = tuple.getString(0);
-		final OrganizationInfo info = search(gid);
-		if( info != null ) {
-			if( info.company != null ) {
-				collector.emit(new Values(info.company,info.agent));
-				return;
-			}
+		final String type = getGroupType(gid);
+		if( type == null ) {
+			logger.error("Bad GID format: " + gid);
+			return;
 		}
-		logger.warn("Can not found OrganizationInfo for " + gid);
+		final OrganizationInfo info = search(gid);
+		if( info != null && info.company != null ) {
+			collector.emit(new Values(type,info.company,info.agent));
+		} else {
+			logger.warn("Can not found OrganizationInfo for " + gid);
+		}
+	}
+
+	private String getGroupType(final String gid) {
+		try {
+			long g = Long.parseLong(gid);
+			if( g >= 0x70000000L ) {
+				return ValueConstant.GROUP_TYPE_TEMP;
+			} else {
+				return ValueConstant.GROUP_TYPE_NORMAL;
+			}
+		} catch( NumberFormatException e ) {
+			return null;
+		}
 	}
 
 

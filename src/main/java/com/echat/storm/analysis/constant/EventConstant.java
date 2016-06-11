@@ -71,6 +71,7 @@ public class EventConstant {
 	public static final String REPORT_USER_LOAD_HOUR = "report-uload-hour";
 
 
+
 	public static String[] getOnlineEvents() {
 		return new String[] {
 			EVENT_LOGIN,

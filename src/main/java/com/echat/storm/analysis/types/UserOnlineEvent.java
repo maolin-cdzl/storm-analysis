@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.echat.storm.analysis.constant.*;
 
 public class UserOnlineEvent {
-	private static final Logger log = LoggerFactory.getLogger(UserOnlineEvent.class);
-
 	public String server;
 	public String datetime;
 	public String event;

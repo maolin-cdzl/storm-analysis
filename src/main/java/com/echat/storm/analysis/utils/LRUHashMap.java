@@ -8,11 +8,7 @@ public class LRUHashMap<A, B> extends LinkedHashMap<A, B> {
 
 
     public LRUHashMap(int maxSize) {
-		int initSize = maxSize;
-		if( initSize > 10000 ) {
-			initSize = 10000;
-		}
-        super(initSize, 0.75f, true);
+        super(maxSize > 10000 ? 10000 : maxSize + 1, 0.75f, true);
         _maxSize = maxSize;
     }
 

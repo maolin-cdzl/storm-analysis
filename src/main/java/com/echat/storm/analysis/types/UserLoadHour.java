@@ -1,6 +1,6 @@
 package com.echat.storm.analysis.types;
 
-public class ServerUserLoadHour {
+public class UserLoadHour {
 	public int					onlines = 0;
 	public int					loginUsers = 0;
 	public int					loginTimes = 0;

@@ -6,8 +6,8 @@ import backtype.storm.tuple.Values;
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.TopologyConstant;
 
-public class ServerLoadReport {
-	public String				server;
+public class TimeBucketReport {
+	public String				entity;
 	public String				type;
 	public String				bucket;
 
@@ -15,23 +15,23 @@ public class ServerLoadReport {
 
 	static public Fields getFields() {
 		return new Fields(
-			FieldConstant.SERVER_FIELD,
-			FieldConstant.REPORT_TYPE,
-			FieldConstant.REPORT_BUCKET,
-			FieldConstant.REPORT_CONTENT
+			FieldConstant.REPORT_ENTITY_FIELD,
+			FieldConstant.REPORT_TYPE_FIELD,
+			FieldConstant.REPORT_BUCKET_FIELD,
+			FieldConstant.REPORT_CONTENT_FIELD
 		);
 	}
 
-	static public Values makeReport(final String server,final String type,long bucket,final String content) {
+	static public Values makeReport(final String entity,final String type,long bucket,final String content) {
 		return new Values(
-			server,type,
+			entity,type,
 			TopologyConstant.formatDatetime(bucket),
 			content
 		);
 	}
 
 	public Values toValues() {
-		return new Values(server,type,bucket,report);
+		return new Values(entity,type,bucket,report);
 	}
 }
 

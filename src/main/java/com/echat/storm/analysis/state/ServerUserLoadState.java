@@ -22,7 +22,7 @@ import com.echat.storm.analysis.constant.*;
 import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
-public class ServerUserLoadState extends BaseState {
+public class ServerUserLoadState extends BaseState implements IUserLoadReportReceiver {
 	private static final Logger logger = LoggerFactory.getLogger(ServerUserLoadState.class);
 
 	static public class Factory implements StateFactory {
@@ -34,47 +34,68 @@ public class ServerUserLoadState extends BaseState {
 		}
 	}
 
-	private HashMap<String,ServerUserLoadRecord>				_servers;
+	private HashMap<String,UserLoadRecorder>		_servers;
+	private LinkedList<Values>							reports;
+	private Gson										gson;
 
 	public ServerUserLoadState() {
 		super(null,null);
-		_servers = new HashMap<String,ServerUserLoadRecord>();
+		_servers = new HashMap<String,UserLoadRecorder>();
+		reports = new LinkedList<Values>();
+		gson = TopologyConstant.createStdGson();
 	}
 
 
 	public void login(final String server,long timestamp,final String uid) {
-		ServerUserLoadRecord s = getServer(server);
+		UserLoadRecorder s = getServer(server);
 		s.login(timestamp,uid);
 	}
 
 	public void logout(final String server,long timestamp,final String uid) {
-		ServerUserLoadRecord s = getServer(server);
+		UserLoadRecorder s = getServer(server);
 		s.logout(timestamp,uid);
 	}
 
 	public void broken(final String server,long timestamp,final String uid) {
-		ServerUserLoadRecord s = getServer(server);
+		UserLoadRecorder s = getServer(server);
 		s.broken(timestamp,uid);
 	}
 
 	public List<Values> pollReport() {
-		List<Values> reports = new LinkedList<Values>();
-		for(ServerUserLoadRecord inst : _servers.values()) {
-			List<Values> r = inst.pollReport();
-			if( r != null ) {
-				reports.addAll(r);
-			}
+		if( reports.isEmpty() ) {
+			return null;
+		} else {
+			List<Values> r = reports;
+			reports = new LinkedList<Values>();
+			return r;
 		}
-		return reports;
 	}
 
-	private ServerUserLoadRecord getServer(final String server) {
-		ServerUserLoadRecord inst = _servers.get(server);
+	private UserLoadRecorder getServer(final String server) {
+		UserLoadRecorder inst = _servers.get(server);
 		if( inst == null ) {
-			inst = new ServerUserLoadRecord(server);
+			inst = new UserLoadRecorder(server,this);
 			_servers.put(server,inst);
 		}
 		return inst;
+	}
+
+	@Override
+	public void onSecondReport(final String id,long bucket,UserLoadSecond report) {
+		reports.add(TimeBucketReport.makeReport(
+						id,
+						EventConstant.REPORT_USER_LOAD_SECOND,
+						bucket,
+						gson.toJson(report)));
+	}
+
+	@Override
+	public void onMinuteReport(final String id,long bucket,UserLoadHour report) {
+		reports.add(TimeBucketReport.makeReport(
+						id,
+						EventConstant.REPORT_USER_LOAD_HOUR,
+						bucket,
+						gson.toJson(report)));
 	}
 }
 

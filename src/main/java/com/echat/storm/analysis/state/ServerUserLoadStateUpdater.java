@@ -58,8 +58,10 @@ public class ServerUserLoadStateUpdater extends BaseStateUpdater<ServerUserLoadS
 		}
 
 		List<Values> reports = state.pollReport();
-		for(Values v : reports) {
-			collector.emit(v);
+		if( reports != null ) {
+			for(Values v : reports) {
+				collector.emit(v);
+			}
 		}
 	}
 }

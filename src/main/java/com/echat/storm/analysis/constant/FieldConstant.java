@@ -37,8 +37,9 @@ public class FieldConstant {
 	public static final String SERVER_LOAD_FIELD = "server-load";
 	public static final String OFFLINE_TIME_FIELD = "offtime";
 
-	public static final String REPORT_TYPE = "rp-type";
-	public static final String REPORT_BUCKET  = "rp-bucket";
-	public static final String REPORT_CONTENT = "rp-content";
+	public static final String REPORT_ENTITY_FIELD = "rp-entity";
+	public static final String REPORT_TYPE_FIELD = "rp-type";
+	public static final String REPORT_BUCKET_FIELD  = "rp-bucket";
+	public static final String REPORT_CONTENT_FIELD = "rp-content";
 }
 

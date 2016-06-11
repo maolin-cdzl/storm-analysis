@@ -1,6 +1,6 @@
 package com.echat.storm.analysis.types;
 
-public class ServerUserLoadSecond {
+public class UserLoadSecond {
 	public int					onlines = 0;
 	public int					loginTimes = 0;
 	public int					logoutTimes = 0;

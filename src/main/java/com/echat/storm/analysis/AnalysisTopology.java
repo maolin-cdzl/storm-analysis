@@ -71,14 +71,31 @@ public class AnalysisTopology {
 				UserActionEvent.getFields(),
 				new UserActionHBaseUpdater());
 
-		actionStream.each(
+		Stream onlineStream = actionStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
 				new EventFilter(UserOnlineStateUpdater.getInputEvents()))
 			.partitionPersist(
 				new UserOnlineState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
 				UserActionEvent.getFields(),
 				new UserOnlineStateUpdater(),
-				UserOnlineEvent.getFields());
+				UserOnlineEvent.getFields())
+			.newValuesStream();
+
+		onlineStream.partitionBy(new Fields(FieldConstant.UID_FIELD))
+			.partitionPersist(
+				new ServerUserLoadState.Factory(),
+				UserOnlineEvent.getFields(),
+				new ServerUserLoadStateUpdater()
+			);
+
+		/*
+		onlineStream.partitionBy(new Fields(FieldConstant.COMPANY_FIELD))
+			.partitionPersist(
+				new CompanyLoadState.Factory(),
+				UserOnlineEvent.getFields(),
+				new CompanyLoadStateUpdater()
+			);
+			*/
 
 		
 		/*

@@ -70,6 +70,44 @@ public class EventConstant {
 	public static final String REPORT_USER_LOAD_SECOND = "report-uload-sec";
 	public static final String REPORT_USER_LOAD_HOUR = "report-uload-hour";
 
+
+	public static String[] getOnlineEvents() {
+		return new String[] {
+			EVENT_LOGIN,
+			EVENT_RELOGIN,
+			EVENT_BROKEN,
+			EVENT_LOGOUT
+		};
+	}
+
+	public static String[] getGroupEvents() {
+		return new String[] {
+			EVENT_JOIN_GROUP,
+			EVENT_LEAVE_GROUP,
+			EVENT_GET_MIC,
+			EVENT_RELEASE_MIC,
+			EVENT_DENT_MIC,
+			EVENT_LOSTMIC_AUTO,
+			EVENT_LOSTMIC_REPLACE
+		};
+	}
+
+	public static String[] getGroupInOutEvents() {
+		return new String[] {
+			EVENT_JOIN_GROUP,
+			EVENT_LEAVE_GROUP
+		};
+	}
+
+	public static String[] getGroupSpeakEvents() {
+		return new String[] {
+			EVENT_GET_MIC,
+			EVENT_RELEASE_MIC,
+			EVENT_DENT_MIC,
+			EVENT_LOSTMIC_AUTO,
+			EVENT_LOSTMIC_REPLACE
+		};
+	}
 }
 
 

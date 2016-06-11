@@ -40,15 +40,6 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 	private static final String TIMELINE_OFFLINE = "of";
 	private static final Logger logger = LoggerFactory.getLogger(UserOnlineStateUpdater.class);
 
-	static public String[] getInputEvents() {
-		return new String[] {
-			EventConstant.EVENT_LOGIN,
-			EventConstant.EVENT_RELOGIN,
-			EventConstant.EVENT_BROKEN,
-			EventConstant.EVENT_LOGOUT
-		};
-	}
-
 	static private class SessionRecord {
 		public final UserOnlineEvent	logout;
 		public Response<String>			lastLogin;

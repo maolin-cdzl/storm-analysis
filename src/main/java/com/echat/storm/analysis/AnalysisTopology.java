@@ -73,7 +73,7 @@ public class AnalysisTopology {
 
 		Stream onlineStream = actionStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
-				new EventFilter(UserOnlineStateUpdater.getInputEvents()))
+				new EventFilter(EventConstant.getOnlineEvents()))
 			.partitionPersist(
 				new UserOnlineState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
 				UserActionEvent.getFields(),
@@ -81,7 +81,7 @@ public class AnalysisTopology {
 				UserOnlineEvent.getFields())
 			.newValuesStream();
 
-		onlineStream.partitionBy(new Fields(FieldConstant.UID_FIELD))
+		TridentState serverUserLoadState = onlineStream.partitionBy(new Fields(FieldConstant.UID_FIELD))
 			.partitionPersist(
 				new ServerUserLoadState.Factory(),
 				UserOnlineEvent.getFields(),
@@ -89,7 +89,7 @@ public class AnalysisTopology {
 				TimeBucketReport.getFields()
 			);
 
-		onlineStream.partitionBy(new Fields(FieldConstant.COMPANY_FIELD))
+		TridentState companyUserLoadState = onlineStream.partitionBy(new Fields(FieldConstant.COMPANY_FIELD))
 			.partitionPersist(
 				new CompanyUserLoadState.Factory(),
 				UserOnlineEvent.getFields(),
@@ -97,6 +97,15 @@ public class AnalysisTopology {
 				TimeBucketReport.getFields()
 			);
 
+		Stream groupStream = actionStream.each(
+				new Fields(FieldConstant.EVENT_FIELD),
+				new EventFilter(EventConstant.getGroupEvents()))
+			.partitionBy(
+				new Fields(FieldConstant.GID_FIELD))
+			.each(
+				new Fields(FieldConstant.GID_FIELD),
+				new CompleteOrganizationByGID(RedisConfig.defaultConfig()),
+				CompleteOrganizationByGID.getOutputFields());
 		
 		/*
 		// store to hbase

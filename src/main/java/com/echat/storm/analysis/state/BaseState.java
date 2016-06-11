@@ -75,14 +75,14 @@ public class BaseState implements State {
 		}
     }
 
-    synchronized public Jedis getJedis() {
+    public Jedis getJedis() {
 		if( jedisPool == null ) {
 			throw new RuntimeException("Did not setup jedis configure");
 		}
         return jedisPool.getResource();
     }
 
-    synchronized public void returnJedis(Jedis jedis) {
+    public void returnJedis(Jedis jedis) {
 		if( jedisPool == null ) {
 			throw new RuntimeException("Did not setup jedis configure");
 		}
@@ -93,7 +93,7 @@ public class BaseState implements State {
 		return HConnectionManager.createConnection(hbaseConfiguration);
 	}
 
-	synchronized public HTableInterface getHTable(final String tableName) {
+	public HTableInterface getHTable(final String tableName) {
 		if( hbaseConfiguration == null ) {
 			throw new RuntimeException("Did not setup hbase configure");
 		}
@@ -119,7 +119,7 @@ public class BaseState implements State {
 		return table;
 	}
 
-	synchronized public void returnHTable(HTableInterface table) {
+	public void returnHTable(HTableInterface table) {
 		try {
 			if( table != null ) {
 				table.close();

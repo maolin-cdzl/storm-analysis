@@ -85,17 +85,17 @@ public class AnalysisTopology {
 			.partitionPersist(
 				new ServerUserLoadState.Factory(),
 				UserOnlineEvent.getFields(),
-				new ServerUserLoadStateUpdater()
+				new ServerUserLoadStateUpdater(),
+				TimeBucketReport.getFields()
 			);
 
-		/*
 		onlineStream.partitionBy(new Fields(FieldConstant.COMPANY_FIELD))
 			.partitionPersist(
-				new CompanyLoadState.Factory(),
+				new CompanyUserLoadState.Factory(),
 				UserOnlineEvent.getFields(),
-				new CompanyLoadStateUpdater()
+				new CompanyUserLoadStateUpdater(),
+				TimeBucketReport.getFields()
 			);
-			*/
 
 		
 		/*

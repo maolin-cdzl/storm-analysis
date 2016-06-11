@@ -22,42 +22,42 @@ import com.echat.storm.analysis.constant.*;
 import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
-public class ServerUserLoadState extends BaseState implements IUserLoadReportReceiver {
-	private static final Logger logger = LoggerFactory.getLogger(ServerUserLoadState.class);
+public class CompanyUserLoadState extends BaseState implements IUserLoadReportReceiver {
+	private static final Logger logger = LoggerFactory.getLogger(CompanyUserLoadState.class);
 
 	static public class Factory implements StateFactory {
 		public Factory() {
 		}
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new ServerUserLoadState();
+			return new CompanyUserLoadState();
 		}
 	}
 
-	private HashMap<String,UserLoadRecorder>		_servers;
+	private HashMap<String,UserLoadRecorder>			_companys;
 	private LinkedList<Values>							reports;
 	private Gson										gson;
 
-	public ServerUserLoadState() {
+	public CompanyUserLoadState() {
 		super(null,null);
-		_servers = new HashMap<String,UserLoadRecorder>();
+		_companys = new HashMap<String,UserLoadRecorder>();
 		reports = new LinkedList<Values>();
 		gson = TopologyConstant.createStdGson();
 	}
 
 
-	public void login(final String server,long timestamp,final String uid) {
-		UserLoadRecorder s = getRecorder(server);
+	public void login(final String company,long timestamp,final String uid) {
+		UserLoadRecorder s = getRecorder(company);
 		s.login(timestamp,uid);
 	}
 
-	public void logout(final String server,long timestamp,final String uid) {
-		UserLoadRecorder s = getRecorder(server);
+	public void logout(final String company,long timestamp,final String uid) {
+		UserLoadRecorder s = getRecorder(company);
 		s.logout(timestamp,uid);
 	}
 
-	public void broken(final String server,long timestamp,final String uid) {
-		UserLoadRecorder s = getRecorder(server);
+	public void broken(final String company,long timestamp,final String uid) {
+		UserLoadRecorder s = getRecorder(company);
 		s.broken(timestamp,uid);
 	}
 
@@ -71,11 +71,11 @@ public class ServerUserLoadState extends BaseState implements IUserLoadReportRec
 		}
 	}
 
-	private UserLoadRecorder getRecorder(final String server) {
-		UserLoadRecorder inst = _servers.get(server);
+	private UserLoadRecorder getRecorder(final String company) {
+		UserLoadRecorder inst = _companys.get(company);
 		if( inst == null ) {
-			inst = new UserLoadRecorder(server,this);
-			_servers.put(server,inst);
+			inst = new UserLoadRecorder(company,this);
+			_companys.put(company,inst);
 		}
 		return inst;
 	}
@@ -98,5 +98,6 @@ public class ServerUserLoadState extends BaseState implements IUserLoadReportRec
 						gson.toJson(report)));
 	}
 }
+
 
 

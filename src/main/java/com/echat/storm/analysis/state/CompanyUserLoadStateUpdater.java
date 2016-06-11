@@ -25,23 +25,23 @@ import com.echat.storm.analysis.constant.*;
 import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
-public class ServerUserLoadStateUpdater extends BaseStateUpdater<ServerUserLoadState> {
-	private static final Logger logger = LoggerFactory.getLogger(ServerUserLoadStateUpdater.class);
+public class CompanyUserLoadStateUpdater extends BaseStateUpdater<CompanyUserLoadState> {
+	private static final Logger logger = LoggerFactory.getLogger(CompanyUserLoadStateUpdater.class);
 
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
 	}
 
 	@Override
-	public void updateState(ServerUserLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
+	public void updateState(CompanyUserLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
 		for(TridentTuple tuple : inputs) {
 			UserOnlineEvent ev = UserOnlineEvent.fromTuple(tuple);
 			if( EventConstant.EVENT_USER_ONLINE.equals(ev.event) ) {
-				state.login(ev.server,ev.getTimeStamp(),ev.uid);
+				state.login(ev.company,ev.getTimeStamp(),ev.uid);
 			} else if( EventConstant.EVENT_USER_OFFLINE.equals(ev.event) ) {
-				state.logout(ev.server,ev.getTimeStamp(),ev.uid);
+				state.logout(ev.company,ev.getTimeStamp(),ev.uid);
 			} else if( EventConstant.EVENT_USER_BROKEN.equals(ev.event) ) {
-				state.broken(ev.server,ev.getTimeStamp(),ev.uid);
+				state.broken(ev.company,ev.getTimeStamp(),ev.uid);
 			} else {
 				logger.warn("Unknown event: " + ev.event);
 			}
@@ -55,4 +55,5 @@ public class ServerUserLoadStateUpdater extends BaseStateUpdater<ServerUserLoadS
 		}
 	}
 }
+
 

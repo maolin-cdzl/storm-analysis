@@ -60,7 +60,7 @@ public class AnalysisTopology {
 				new FieldFilter(FieldConstant.EVENT_FIELD))
 			.partitionBy(new Fields(FieldConstant.UID_FIELD))
 			.each(
-				new Fields(FieldConstant.UID_FIELD),
+				CompleteOrganizationByUID.getInputFields(),
 				new CompleteOrganizationByUID(RedisConfig.defaultConfig()),
 				CompleteOrganizationByUID.getOutputFields())
 			.project(UserActionEvent.getFields());
@@ -103,12 +103,12 @@ public class AnalysisTopology {
 			.partitionBy(
 				new Fields(FieldConstant.GID_FIELD))
 			.each(
-				new Fields(FieldConstant.GID_FIELD),
+				CompleteGroupEvent.getInputFields(),
 				new CompleteGroupEvent(RedisConfig.defaultConfig()),
 				CompleteGroupEvent.getOutputFields())
 			.project(GroupEvent.getFields());
 		
-		Stream serverGroupLoadStream = groupStream.each(
+		Stream groupReportStream = groupStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
 				new EventFilter(EventConstant.getGroupInOutEvents()))
 			.partitionPersist(
@@ -117,6 +117,17 @@ public class AnalysisTopology {
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())
 			.newValuesStream();
+
+		Stream speakReportStream = groupStream.each(
+				new Fields(FieldConstant.EVENT_FIELD),
+				new EventFilter(EventConstant.getGroupSpeakEvents()))
+			.partitionPersist(
+				new SpeakState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
+				GroupEvent.getFields(),
+				new SpeakStateUpdater(),
+				TimeBucketReport.getFields())
+			.newValuesStream();
+
 
 		/*
 		// store to hbase

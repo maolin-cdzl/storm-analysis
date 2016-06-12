@@ -33,6 +33,13 @@ public class CompleteGroupEvent extends BaseFunction {
 		public OrganizationInfo		info;
 	}
 
+	static public Fields getInputFields() {
+		return new Fields(
+				FieldConstant.GID_FIELD,
+				FieldConstant.COMPANY_FIELD,
+				FieldConstant.AGENT_FIELD);
+	}
+
 	static public Fields getOutputFields() {
 		return new Fields(
 				FieldConstant.GROUP_TYPE_FIELD,
@@ -55,12 +62,17 @@ public class CompleteGroupEvent extends BaseFunction {
 		if( type == null ) {
 			logger.error("Bad GID format: " + gid);
 			return;
-		}
-		final OrganizationInfo info = search(gid);
-		if( info != null && info.company != null ) {
-			collector.emit(new Values(type,info.company,info.agent));
+		} else if( ValueConstant.GROUP_TYPE_TEMP.equals(type) ) {
+			final String company = tuple.getString(1);
+			final String agent = tuple.getString(2);
+			collector.emit(new Values(type,company,agent));
 		} else {
-			logger.warn("Can not found OrganizationInfo for " + gid);
+			final OrganizationInfo info = search(gid);
+			if( info != null && info.company != null ) {
+				collector.emit(new Values(type,info.company,info.agent));
+			} else {
+				logger.warn("Can not found OrganizationInfo for " + gid);
+			}
 		}
 	}
 

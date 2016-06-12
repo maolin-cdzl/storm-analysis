@@ -4,3 +4,4 @@
 4. 更新server列表放到server每秒负载处理器里面去.
 5. 调整设置并发度
 6. HBase 地址配置
+7. 实现Speek State统计

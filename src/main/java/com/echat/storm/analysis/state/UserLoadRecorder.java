@@ -117,7 +117,10 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 	@Override
 	public void onSkip(long bucket) {
 		logger.warn(id + " skip " + bucket);
-		UserLoadSecond report = new UserLoadSecond();
+		UserLoadSecond report = loadHistory.peekLast();
+		if( report == null ) {
+			report = new UserLoadSecond();
+		}
 
 		secondReport(bucket,report);
 	}

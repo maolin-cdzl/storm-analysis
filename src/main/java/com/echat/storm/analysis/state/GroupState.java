@@ -29,11 +29,13 @@ class GroupRuntimeInfo {
 	public final boolean	isTemp;
 	public final String		server;
 	public final String		gid;
+	public final String		company;
 
-	public GroupRuntimeInfo(boolean t,final String s,final String g) {
+	public GroupRuntimeInfo(boolean t,final String s,final String g,final String c) {
 		isTemp = t;
 		server = s;
 		gid = g;
+		company = c;
 	}
 }
 
@@ -109,10 +111,12 @@ public class GroupState extends BaseState {
 						pipe.sadd(RedisConstant.SERVER_PREFIX + c.server + RedisConstant.TEMP_GROUP_SUFFIX,c.gid);
 						pipe.sadd(RedisConstant.TEMP_GROUP_PREFIX + c.gid + RedisConstant.SERVER_SUFFIX, c.server);
 						pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + c.gid + RedisConstant.SERVER_SUFFIX,TopologyConstant.HOUR_SECONDS);
+						pipe.sadd(RedisConfig.COMPANY_PREFIX + c.group_company + RedisConfig.TEMP_GROUP_SUFFIX,c.gid);
 					} else {
 						pipe.sadd(RedisConstant.ONLINE_GROUP_KEY,c.gid);
 						pipe.sadd(RedisConstant.SERVER_PREFIX + c.server + RedisConstant.GROUP_SUFFIX,c.gid);
 						pipe.sadd(RedisConstant.GROUP_PREFIX + c.gid + RedisConstant.SERVER_SUFFIX, c.server);
+						pipe.sadd(RedisConfig.COMPANY_PREFIX + c.group_company + RedisConfig.GROUP_SUFFIX,c.gid);
 					}
 				}
 				_groupJoined.clear();
@@ -148,12 +152,14 @@ public class GroupState extends BaseState {
 							for(String s : servers) {
 								pipe.srem(RedisConstant.SERVER_PREFIX + s + RedisConstant.GROUP_SUFFIX,mc.group.gid);
 							}
+							pipe.srem(RedisConstant.COMPANY_PREFIX + mc.group.company + RedisConstant.TEMP_GROUP_SUFFIX,mc.group.gid);
 						} else {
 							pipe.srem(RedisConstant.ONLINE_GROUP_KEY,mc.group.gid);
 							pipe.del(RedisConstant.GROUP_PREFIX + mc.group.gid + RedisConstant.SERVER_SUFFIX);
 							for(String s : servers) {
 								pipe.srem(RedisConstant.SERVER_PREFIX + s + RedisConstant.GROUP_SUFFIX,mc.group.gid);
 							}
+							pipe.srem(RedisConstant.COMPANY_PREFIX + mc.group.company + RedisConstant.GROUP_SUFFIX,mc.group.gid);
 						}
 					}
 				}
@@ -205,14 +211,14 @@ public class GroupState extends BaseState {
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,ev.gid);
 				pipe.sadd(RedisConstant.GROUP_PREFIX + ev.gid + RedisConstant.USER_SUFFIX,ev.uid);
 
-				_groupJoined.put(ev.gid,new GroupRuntimeInfo(false,ev.server,ev.gid));
+				_groupJoined.put(ev.gid,new GroupRuntimeInfo(false,ev.server,ev.gid,ev.group_company));
 			} else if( ValueConstant.GROUP_TYPE_TEMP.equals(ev.group_type) ) {
 				final String tgid = getTempGroupID(ev);
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,tgid);
 				pipe.sadd(RedisConstant.TEMP_GROUP_PREFIX + tgid + RedisConstant.USER_SUFFIX,ev.uid);
 				pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + tgid + RedisConstant.USER_SUFFIX,TopologyConstant.HOUR_SECONDS);
 
-				_groupJoined.put(tgid,new GroupRuntimeInfo(true,ev.server,tgid));
+				_groupJoined.put(tgid,new GroupRuntimeInfo(true,ev.server,tgid,ev.group_company));
 			} else {
 				logger.error("Unknown group type: " + ev.group_type);
 			}
@@ -226,14 +232,14 @@ public class GroupState extends BaseState {
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,"0");
 				pipe.srem(RedisConstant.GROUP_PREFIX + ev.gid + RedisConstant.USER_SUFFIX,ev.uid);
 
-				_groupLeft.put(ev.gid,new GroupRuntimeInfo(false,ev.server,ev.gid));
+				_groupLeft.put(ev.gid,new GroupRuntimeInfo(false,ev.server,ev.gid,ev.group_company));
 			} else if( ValueConstant.GROUP_TYPE_TEMP.equals(ev.group_type) ) {
 				final String tgid = getTempGroupID(ev);
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,"0");
 				pipe.srem(RedisConstant.TEMP_GROUP_PREFIX + tgid + RedisConstant.USER_SUFFIX,ev.uid);
 				pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + tgid + RedisConstant.USER_SUFFIX,TopologyConstant.HOUR_SECONDS);
 				
-				_groupLeft.put(tgid,new GroupRuntimeInfo(true,ev.server,tgid));
+				_groupLeft.put(tgid,new GroupRuntimeInfo(true,ev.server,tgid,ev.group_company));
 			} else {
 				logger.error("Unknown group type: " + ev.group_type);
 			}

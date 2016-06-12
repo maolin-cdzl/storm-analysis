@@ -32,6 +32,10 @@ public class CompleteOrganizationByUID extends BaseFunction {
 		public OrganizationInfo		info;
 	}
 
+	static public Fields getInputFields() {
+		return new Fields(FieldConstant.UID_FIELD);
+	}
+
 	static public Fields getOutputFields() {
 		return new Fields(FieldConstant.COMPANY_FIELD,FieldConstant.AGENT_FIELD);
 	}

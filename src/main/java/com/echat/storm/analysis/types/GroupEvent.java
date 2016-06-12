@@ -1,5 +1,15 @@
 package com.echat.storm.analysis.types;
 
+import java.util.Date;
+import java.text.ParseException;
+import org.apache.commons.lang.time.DateUtils;
+
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Values;
+import backtype.storm.tuple.ITuple;
+
+import com.echat.storm.analysis.constant.*;
+
 public class GroupEvent {
 	public String server;
 	public String datetime;

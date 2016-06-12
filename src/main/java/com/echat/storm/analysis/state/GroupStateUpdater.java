@@ -38,7 +38,6 @@ import com.echat.storm.analysis.utils.*;
 public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 	private static final Logger logger = LoggerFactory.getLogger(GroupStateUpdater.class);
 
-	private HashSet<String> 
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
 		super.prepare(conf,context);
@@ -48,41 +47,15 @@ public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 	public void updateState(GroupState state, List<TridentTuple> inputs,TridentCollector collector) {
 		logger.info("updateState, input tuple count: " + inputs.size());
 
-		TimelineUtil<String> timeline = state.getTimeline();
-		Jedis jedis = null;
-		try {
-			jedis = state.getJedis();
-			Pipeline pipe = jedis.pipelined();
-
-			for(TridentTuple tuple : inputs) {
-				GroupEvent ev = GroupEvent.fromTuple(tuple);
-				if( EventConstant.EVENT_JOIN_GROUP.equals(ev.event) ) {
-					join(pipe,timeline,ev);
-				} else if( EventConstant.EVENT_LEAVE_GROUP.equals(ev.event) ) {
-					leave(pipe,timeline,ev);
-				} else {
-					logger.warn("Unkown event: " + ev.event);
-				}
+		List<GroupEvent> events = new LinkedList<GroupEvent>();
+		for(TridentTuple tuple : inputs) {
+			events.add( GroupEvent.fromTuple(tuple) );
+		}
+		List<Values> reports = state.update(events);
+		if( reports != null ) {
+			for(Values v : reports) {
+				collector.emit(v);
 			}
-			pipe.sync();
-		} finally {
-			state.returnJedis(jedis);
-		}
-	}
-
-	private void join(Pipeline pipe,TimelineUtil<String> timeline,GroupEvent ev) {
-		final String key = ev.gid + ev.uid;
-		if( timeline.update(key,ev.getTimeStamp(),ev.event) ) {
-			pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,ev.gid);
-			pipe.sadd(RedisConstant.GROUP_PREFIX + ev.gid + RedisConstant.USER_SUFFIX,ev.uid);
-		}
-	}
-
-	private void leave(GroupEvent ev) {
-		final String key = ev.gid + ev.uid;
-		if( timeline.update(key,ev.getTimeStamp(),ev.event) ) {
-			pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,"0");
-			pipe.srem(RedisConstant.GROUP_PREFIX + ev.gid + RedisConstant.USER_SUFFIX,ev.uid);
 		}
 	}
 }

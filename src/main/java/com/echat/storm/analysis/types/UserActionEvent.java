@@ -7,12 +7,10 @@ import org.apache.commons.lang.time.DateUtils;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.tuple.ITuple;
-import com.echat.storm.analysis.constant.FieldConstant;
-import com.echat.storm.analysis.constant.TopologyConstant;
 
 import org.apache.hadoop.hbase.client.Put;
-import com.echat.storm.analysis.utils.BytesUtil;
 
+import com.echat.storm.analysis.utils.BytesUtil;
 import com.echat.storm.analysis.constant.*;
 
 public class UserActionEvent {

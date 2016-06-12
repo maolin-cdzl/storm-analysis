@@ -112,7 +112,7 @@ public class AnalysisTopology {
 				new Fields(FieldConstant.EVENT_FIELD),
 				new EventFilter(EventConstant.getGroupInOutEvents()))
 			.partitionPersist(
-				new GroupState.Factory(),
+				new GroupState.Factory(RedisConfig.defaultConfig()),
 				GroupEvent.getFields(),
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())

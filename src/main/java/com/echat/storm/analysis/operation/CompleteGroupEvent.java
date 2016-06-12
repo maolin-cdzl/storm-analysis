@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 import com.echat.storm.analysis.constant.FieldConstant;
+import com.echat.storm.analysis.constant.ValueConstant;
 import com.echat.storm.analysis.types.RedisConfig;
 import com.echat.storm.analysis.utils.LRUHashMap;
 

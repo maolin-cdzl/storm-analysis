@@ -31,21 +31,9 @@ class UserLoadRecord {
 
 
 public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLoadRecord> {
-	private static final long SECOND_MILLIS = 1000;
-	private static final long MINUTE_MILLIS = 1000 * 60;
-	private static final long HOUR_MILLIS = 1000 * 60 * 60;
-	private static final long HOUR_SECONDS = 3600;
 	private static final long SECOND_SLIDING_WINDOW = 3000;
 
 	private static final Logger logger = LoggerFactory.getLogger(UserLoadRecorder.class);
-
-	static public long toSecondBucket(long ts) {
-		return (ts / SECOND_MILLIS) * SECOND_MILLIS;
-	}
-
-	static public long toMinuteBucket(long ts) {
-		return (ts / MINUTE_MILLIS) * MINUTE_MILLIS;
-	}
 
 	public final String									id;
 	private IUserLoadReportReceiver						receiver;
@@ -62,7 +50,7 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 		id = n;
 		receiver = r;
 		minuteBucket = 0L;
-		secondSliding = new TimeBucketSlidingWindow<UserLoadRecord>(SECOND_MILLIS,SECOND_SLIDING_WINDOW,this);
+		secondSliding = new TimeBucketSlidingWindow<UserLoadRecord>(TopologyConstant.SECOND_MILLIS,SECOND_SLIDING_WINDOW,this);
 		onlines = new HashSet<String>();
 		timeoutedOnlines = new TimeoutedSet<String>();
 		timeoutedLogins = new TimeoutedSet<String>();
@@ -72,8 +60,8 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 	}
 
 	public void login(long timestamp,final String uid) {
-		final long bucket = toSecondBucket(timestamp);
-		final long timeout = bucket + HOUR_MILLIS;
+		final long bucket = TopologyConstant.toSecondBucket(timestamp);
+		final long timeout = bucket + TopologyConstant.HOUR_MILLIS;
 
 		timeoutedOnlines.put(uid);
 		timeoutedLogins.put(uid,timeout);
@@ -82,8 +70,8 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 	}
 
 	public void logout(long timestamp,final String uid) {
-		final long bucket = toSecondBucket(timestamp);
-		final long timeout = bucket + HOUR_MILLIS;
+		final long bucket = TopologyConstant.toSecondBucket(timestamp);
+		final long timeout = bucket + TopologyConstant.HOUR_MILLIS;
 
 		timeoutedOnlines.put(uid,timeout);
 		timeoutedLogouts.put(uid,timeout);
@@ -92,8 +80,8 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 	}
 
 	public void broken(long timestamp,final String uid) {
-		final long bucket = toSecondBucket(timestamp);
-		final long timeout = bucket + HOUR_MILLIS;
+		final long bucket = TopologyConstant.toSecondBucket(timestamp);
+		final long timeout = bucket + TopologyConstant.HOUR_MILLIS;
 
 		timeoutedBrokens.put(uid,timeout);
 		UserLoadRecord record = secondSliding.get(bucket);
@@ -136,22 +124,22 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 
 	private void secondReport(long bucket,UserLoadSecond report) {
 		loadHistory.add(report);
-		if( loadHistory.size() > HOUR_SECONDS ) {
+		if( loadHistory.size() > TopologyConstant.HOUR_SECONDS ) {
 			loadHistory.remove();
 		}
 
 		receiver.onSecondReport(id,bucket,report);
 
 		if( minuteBucket == 0L ) {
-			minuteBucket = toMinuteBucket(bucket);
-		} else if( bucket >= minuteBucket + MINUTE_MILLIS ) {
-			minuteBucket = toMinuteBucket(bucket);
+			minuteBucket = TopologyConstant.toMinuteBucket(bucket);
+		} else if( bucket >= minuteBucket + TopologyConstant.MINUTE_MILLIS ) {
+			minuteBucket = TopologyConstant.toMinuteBucket(bucket);
 			minuteReport();
 		}
 	}
 
 	private void minuteReport() {
-		final long start = minuteBucket - HOUR_MILLIS;
+		final long start = minuteBucket - TopologyConstant.HOUR_MILLIS;
 		UserLoadHour report = new UserLoadHour();
 
 		report.onlines = timeoutedOnlines.values(start).size();

@@ -1,5 +1,7 @@
 package com.echat.storm.analysis.utils;
 
+import java.util.Set;
+
 public class TimelineUtil<T> {
 	public class Value {
 		public long			time;
@@ -54,5 +56,8 @@ public class TimelineUtil<T> {
 		}
 	}
 
+	public Set<String> keySet() {
+		return timelineMap.keySet();
+	}
 }
 

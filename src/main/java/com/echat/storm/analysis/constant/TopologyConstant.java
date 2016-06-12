@@ -48,6 +48,20 @@ public class TopologyConstant {
 	static public java.util.Date widelyParseDatetime(final String datetime) throws java.text.ParseException {
 		return DateUtils.parseDate(datetime,INPUT_DATETIME_FORMAT);
 	}
+
+	public static final int SECOND_MILLIS = 1000;
+	public static final int MINUTE_MILLIS = 1000 * 60;
+	public static final int HOUR_MILLIS = 1000 * 60 * 60;
+	public static final int HOUR_SECONDS = 3600;
+
+	static public long toSecondBucket(long ts) {
+		return (ts / SECOND_MILLIS) * SECOND_MILLIS;
+	}
+
+	static public long toMinuteBucket(long ts) {
+		return (ts / MINUTE_MILLIS) * MINUTE_MILLIS;
+	}
+
 }
 
 

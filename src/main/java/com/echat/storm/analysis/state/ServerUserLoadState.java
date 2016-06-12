@@ -84,7 +84,7 @@ public class ServerUserLoadState extends BaseState implements IUserLoadReportRec
 	public void onSecondReport(final String id,long bucket,UserLoadSecond report) {
 		reports.add(TimeBucketReport.makeReport(
 						id,
-						EventConstant.REPORT_USER_LOAD_SECOND,
+						ValueConstant.REPORT_USER_LOAD_SECOND,
 						bucket,
 						gson.toJson(report)));
 	}
@@ -93,7 +93,7 @@ public class ServerUserLoadState extends BaseState implements IUserLoadReportRec
 	public void onMinuteReport(final String id,long bucket,UserLoadHour report) {
 		reports.add(TimeBucketReport.makeReport(
 						id,
-						EventConstant.REPORT_USER_LOAD_HOUR,
+						ValueConstant.REPORT_USER_LOAD_HOUR,
 						bucket,
 						gson.toJson(report)));
 	}

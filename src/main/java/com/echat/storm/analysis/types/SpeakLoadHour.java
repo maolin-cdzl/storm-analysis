@@ -1,10 +1,10 @@
 package com.echat.storm.analysis.types;
 
 public class SpeakLoadHour {
-	public int					speakings;			// 一小时一共有多少发言
+	public long					speakingSeconds;	// 发言总时长
+	public int					speakingTimes;		// 一小时一共有多少发言
 	public int					speakingUsers;		// 有多少用户发言过
 	public int					speakingGroups;		// 有多少群组有过发言
-	public long					speakingSeconds;	// 发言总时长
 	public int					lostAutoTimes;		// 一共多少次服务器摘麦
 	public int					lostAutoUsers;		// 有多少用户被服务器摘麦
 	public int					lostAutoGroups;		// 有多少群组发生过摘麦

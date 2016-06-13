@@ -51,12 +51,61 @@ public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 		for(TridentTuple tuple : inputs) {
 			events.add( GroupEvent.fromTuple(tuple) );
 		}
+		List<Put> gRows = new LinkedList<Put>();
+		List<Put> tgRows = new LinkedList<Put>();
+		for(GroupEvent ev : events) {
+			if( ValueConstant.GROUP_TYPE_TEMP.equals(ev.group_type) ) {
+				tgRow.add( ev.toTempRow() );
+			} else {
+				gRows.add( ev.toRow() );
+			}
+		}
+		if( !gRows.isEmpty() ) {
+			HTableInterface table = state.getHTable(HBaseConstant.GROUP_EVENT_TABLE);
+			if( table != null ) {
+				try {
+					Object[] result = new Object[gRows.size()];
+					table.batch(gRows,result);
+				} catch (InterruptedException e) {
+					logger.error("Error performing put group event to HBase.", e);
+				} catch (IOException e) {
+					logger.error("Error performing put group event to HBase.", e);
+				} finally {
+					if( table != null ) {
+						state.returnHTable(table);
+					}
+				}
+			} else {
+				logger.error("Can not get HTable instance,lost " + gRows.size() + " group event");
+			}
+		}
+		if( !tgRows.isEmpty() ) {
+			HTableInterface table = state.getHTable(HBaseConstant.TEMP_GROUP_EVENT_TABLE);
+			if( table != null ) {
+				try {
+					Object[] result = new Object[tgRows.size()];
+					table.batch(tgRows,result);
+				} catch (InterruptedException e) {
+					logger.error("Error performing put temp group event to HBase.", e);
+				} catch (IOException e) {
+					logger.error("Error performing put temp group event to HBase.", e);
+				} finally {
+					if( table != null ) {
+						state.returnHTable(table);
+					}
+				}
+			} else {
+				logger.error("Can not get HTable instance,lost " + tgRows.size() + " temp group event");
+			}
+		}
+
 		List<Values> reports = state.update(events);
 		if( reports != null ) {
 			for(Values v : reports) {
 				collector.emit(v);
 			}
 		}
+		logger.info("updateState done, input tuple count: " + inputs.size());
 	}
 }
 

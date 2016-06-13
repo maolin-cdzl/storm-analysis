@@ -11,6 +11,13 @@ public class HBaseConstant {
 	// broken history table
 	public static final String BROKEN_HISTORY_TABLE = "broken_history";
 
+	// group event table
+	public static final String GROUP_EVENT_TABLE = "group_event";
+	public static final String TEMP_GROUP_EVENT_TABLE = "temp_group_event";
+	
+	// speaking table
+	public static final String GROUP_SPEAKING_TABLE = "group_speaking";
+	public static final String TEMP_GROUP_SPEAKING_TABLE = "temp_group_speaking";
 	
 
 	// columns
@@ -41,5 +48,8 @@ public class HBaseConstant {
 
 	public static final byte[] COLUMN_OFFLINE_TIME = FieldConstant.OFFLINE_TIME_FIELD.getBytes();
 
+	public static final byte[] COLUMN_GROUP_TYPE = FieldConstant.GROUP_TYPE_FIELD.getBytes();
+	public static final byte[] COLUMN_GROUP_COMPANY = FieldConstant.GROUP_COMPANY_FIELD.getBytes();
+	public static final byte[] COLUMN_GROUP_AGENT = FieldConstant.GROUP_AGENT_FIELD.getBytes();
 }
 

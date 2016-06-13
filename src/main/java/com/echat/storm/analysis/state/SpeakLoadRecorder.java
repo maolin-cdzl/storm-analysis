@@ -25,21 +25,14 @@ import com.echat.storm.analysis.constant.*;
 import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
-class GroupLoadRecord {
+class SpeakLoadRecord {
 	public int					getMic;
 	public int					lostMicAuto;
 	public int					lostMicReplace;
 	public int					dent;
-
-	public GroupLoadRecord() {
-		getMic = 0;
-		lostMicAuto = 0;
-		lostMicReplace = 0;
-		dent = 0;
-	}
 }
 
-public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<GroupLoadRecord> {
+public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<SpeakLoadRecord> {
 	private static final long SECOND_SLIDING_WINDOW = 3000;
 	private static final long MAX_SPEAKING_MILLIS = TopologyConstant.MINUTE_MILLIS * 5;
 
@@ -75,7 +68,7 @@ public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<Group
 		timeoutedLostReplaceGroups = new TimeoutedSet<String>();
 		timeoutedDentUsers = new TimeoutedSet<String>();
 		timeoutedDentGroups = new TimeoutedSet<String>();
-		loadHistory = new LinkedList<SpeakLoadRecord>();
+		loadHistory = new LinkedList<SpeakLoadSecond>();
 	}
 
 	public void getMic(long timestamp,final String gid,final String uid) {
@@ -135,9 +128,9 @@ public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<Group
 
 		SpeakLoadSecond report = new SpeakLoadSecond();
 		report.speakings = speakings.values().size();
-		report.getMicTimes = val.getMic;
+		report.getTimes = val.getMic;
 		report.lostAutoTimes = val.lostMicAuto;
-		report.lostReplaceTimes = val.lostReplace;
+		report.lostReplaceTimes = val.lostMicReplace;
 		report.dentTimes = val.dent;
 
 		secondReport(bucket,report);
@@ -183,11 +176,11 @@ public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<Group
 		report.dentGroups = timeoutedDentGroups.values(start).size();
 
 		for(SpeakLoadSecond sr : loadHistory) {
-			report.speakings += sr.getMic;
 			report.speakingSeconds += sr.speakings;
-			report.lostAutoTimes += sr.lostMicAuto;
-			report.lostReplaceTimes += sr.lostMicReplace;
-			report.dentTimes += sr.dent;
+			report.speakingTimes += sr.getTimes;
+			report.lostAutoTimes += sr.lostAutoTimes;
+			report.lostReplaceTimes += sr.lostReplaceTimes;
+			report.dentTimes += sr.dentTimes;
 		}
 
 		receiver.onMinuteReport(id,minuteBucket,report);

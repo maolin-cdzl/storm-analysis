@@ -8,6 +8,8 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.tuple.ITuple;
 
+import org.apache.hadoop.hbase.client.Put;
+
 import com.echat.storm.analysis.constant.*;
 
 public class GroupEvent {
@@ -80,5 +82,62 @@ public class GroupEvent {
 		}
 		return timestamp;
 	}
+
+	public String getGroupFullId() {
+		if( ValueConstant.GROUP_TYPE_TEMP.equals(type) ) {
+			return server + ":" + gid;
+		} else {
+			return gid;
+		}
+	}
+
+	public Put toRow() {
+		Put row = new Put(rowKey());
+		toRow(row);
+		return row;
+	}
+
+	public Put toTempRow() {
+		Put row = new Put(tempRowKey());
+		toRow(row);
+		return row;
+	}
+
+	public void toRow(Put row) {
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_SERVER,server.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_DATETIME,datetime.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_EVENT,event.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_UID,uid.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_COMPANY,company.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GID,gid.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_TYPE,type.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_COMPANY,group_company.getBytes());
+
+		if( agent != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_AGENT,agent.getBytes());
+		}
+		if( group_agent != null ) {
+			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_AGENT,group_agent.getBytes());
+		}
+	}
+	public byte[] rowKey() {
+		byte[] companyPart = BytesUtil.stringToHashBytes(group_company);
+		byte[] gidPart = BytesUtil.stringToHashBytes(gid);
+		byte[] tsPart = BytesUtil.longToBytes(getTimeStamp());
+		byte[] evPart = BytesUtil.stringToHashBytes(event);
+
+		return BytesUtil.concatBytes(companyPart,gidPart,tsPart,evPart);
+	}
+
+	public byte[] tempRowKey() {
+		byte[] companyPart = BytesUtil.stringToHashBytes(group_company);
+		byte[] tsPart = BytesUtil.longToBytes(getTimeStamp());
+		byte[] serverPart = BytesUtil.stringToHashBytes(server);
+		byte[] gidPart = BytesUtil.stringToHashBytes(gid);
+		byte[] evPart = BytesUtil.stringToHashBytes(event);
+
+		return BytesUtil.concatBytes(companyPart,tsPart,serverPart,gidPart,evPart);
+	}
+
 }
 

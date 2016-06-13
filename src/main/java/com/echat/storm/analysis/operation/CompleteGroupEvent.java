@@ -37,7 +37,8 @@ public class CompleteGroupEvent extends BaseFunction {
 		return new Fields(
 				FieldConstant.GID_FIELD,
 				FieldConstant.COMPANY_FIELD,
-				FieldConstant.AGENT_FIELD);
+				FieldConstant.AGENT_FIELD,
+				FieldConstant.SERVER_FIELD);
 	}
 
 	static public Fields getOutputFields() {
@@ -65,6 +66,9 @@ public class CompleteGroupEvent extends BaseFunction {
 		} else if( ValueConstant.GROUP_TYPE_TEMP.equals(type) ) {
 			final String company = tuple.getString(1);
 			final String agent = tuple.getString(2);
+			final String server = tuple.getString(3);
+
+			final OrganizationInfo info = searchTemp(gid,server,company,agent);
 			collector.emit(new Values(type,company,agent));
 		} else {
 			final OrganizationInfo info = search(gid);
@@ -89,8 +93,6 @@ public class CompleteGroupEvent extends BaseFunction {
 		}
 	}
 
-
-
 	private OrganizationInfo search(final String gid) {
 		final long now = System.currentTimeMillis();
 		TimedOrganizationInfo ti = cache.get(gid);
@@ -107,6 +109,20 @@ public class CompleteGroupEvent extends BaseFunction {
 			ti.info = readFromRedis(gid);
 
 			cache.put(gid,ti);
+		}
+		return ti.info;
+	}
+
+	private OrganizationInfo searchTemp(final String gid,final String server,final String company,final String agent) {
+		final String key = server + gid;
+		TimedOrganizationInfo ti = cache.get(key);
+
+		if( ti == null ) {
+			ti = new TimedOrganizationInfo();
+			ti.expired = 0;
+			ti.info.company = company;
+			ti.info.agent = agent;
+			cache.put(key,ti);
 		}
 		return ti.info;
 	}

@@ -71,6 +71,14 @@ public class TimeoutedSet<T extends Comparable> {
 		return v;
 	}
 
+	public void remove(T v) {
+		TimeoutedItem item = _items.get(v);
+		if( item != null ) {
+			_items.remove(v);
+			_index.remove(item);
+		}
+	}
+
 	public void cleanup(final long now) {
 		TimeoutedItem item;
 		while( ! _index.isEmpty() ) {
@@ -92,7 +100,5 @@ public class TimeoutedSet<T extends Comparable> {
 		cleanup(now);
 		return _items.keySet();
 	}
-
-
-
 }
+

@@ -43,14 +43,59 @@ public class SpeakState extends BaseState {
 		}
 	}
 
+	private HashMap<String,SpeakLoadRecorder>			_serverLoads;
+	private HashMap<String,SpeakLoadRecorder>			_companyLoads;
+	private Gson										_gson;
+	private LinkedList<Values>							_reports;
+
 	public SpeakState(RedisConfig rc,HBaseConfig hc) {
 		super(rc,hc);
-
-		_timeline = new TimelineUtil<String>(10000);
-		_timelineServer = new TimelineUtil<String>(100);
-		_serverLastReport = new HashMap<String,Long>();
-		_groupJoined = new HashMap<String,GroupRuntimeInfo>();
-		_groupLeft = new HashMap<String,GroupRuntimeInfo>();
+		
+		_serverLoads = new HashMap<String,SpeakLoadRecorder>();
+		_companyLoads = new HashMap<String,SpeakLoadRecorder>();
 		_gson = TopologyConstant.createStdGson();
+		_reports = new LinkedList<Values>();
+	}
+
+	public void update(List<GroupEvent> events) {
+		for(GroupEvent ev : events) {
+
+		}
+	}
+
+	public List<Values> pollReport() {
+		if( _reports.isEmpty() ) {
+			return null;
+		} else {
+			List<Values> r = _reports;
+			_reports = new LinkedList<Values>();
+			return r;
+		}
+	}
+
+	private SpeakLoadRecorder getServerRecorder(final String server) {
+		SpeakLoadRecorder inst = _serverLoads.get(server);
+		if( inst == null ) {
+			inst = new SpeakLoadRecorder(server,this);
+			_serverLoads.put(server,inst);
+		}
+		return inst;
+	}
+
+	private SpeakLoadRecorder getCompanyRecorder(final String company) {
+		SpeakLoadRecorder inst = _serverLoads.get(server);
+		if( inst == null ) {
+			inst = new SpeakLoadRecorder(server,this);
+			_serverLoads.put(server,inst);
+		}
+		return inst;
+	}
+
+	@Override
+	public void onSecondReport(final String id,long bucket,SpeakLoadSecond report) {
+	}
+
+	@Override
+	public void onMinuteReport(final String id,long bucket,SpeakLoadHour report) {
 	}
 }

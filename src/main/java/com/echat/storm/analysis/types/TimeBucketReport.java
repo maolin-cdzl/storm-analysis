@@ -11,7 +11,7 @@ import com.echat.storm.analysis.utils.BytesUtil;
 public class TimeBucketReport {
 	public String				entity;
 	public String				type;
-	public String				bucket;
+	public Long					bucket;
 	public String				report;
 
 	static public Fields getFields() {
@@ -26,7 +26,7 @@ public class TimeBucketReport {
 	static public Values makeReport(final String entity,final String type,long bucket,final String content) {
 		return new Values(
 			entity,type,
-			TopologyConstant.formatDatetime(bucket),
+			bucket,
 			content
 		);
 	}
@@ -35,7 +35,7 @@ public class TimeBucketReport {
 		TimeBucketReport report = new TimeBucketReport();
 		report.entity = tuple.getString(0);
 		report.type = tuple.getString(1);
-		report.bucket = tuple.getString(2);
+		report.bucket = tuple.getLong(2);
 		report.report = tuple.getString(3);
 		return report;
 	}

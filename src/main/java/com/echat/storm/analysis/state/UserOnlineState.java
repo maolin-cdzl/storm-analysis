@@ -17,22 +17,15 @@ import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
 public class UserOnlineState extends BaseState {
-	public UserOnlineState(RedisConfig redisConf,HBaseConfig hbaseConf) {
-		super(redisConf,hbaseConf);
-	}
-
 	static public class Factory implements StateFactory {
-		private RedisConfig _redisConfig;
-		private HBaseConfig _hbaseConfig;
-
-		public Factory(RedisConfig redisConf,HBaseConfig hbaseConf) {
-			_redisConfig = redisConf;
-			_hbaseConfig = hbaseConf;
-		}
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new UserOnlineState(_redisConfig,_hbaseConfig);
+			return new UserOnlineState();
 		}
 	}
+
+	public UserOnlineState() {
+	}
+
 }
 

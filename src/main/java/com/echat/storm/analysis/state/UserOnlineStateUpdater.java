@@ -52,7 +52,6 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 
 	private Gson									_gson = null;
 	private TimelineUtil<String>					_timeline = null;
-	private HTableInterface							_table = null;
 	private HashSet<String>							_devices = null;
 	private List<UserOnlineEvent>					_emits = null;
 	private List<SessionRecord>						_offlines = null;
@@ -145,19 +144,6 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 		}
 		_emits.clear();
 
-	}
-
-	private HTableInterface getSessionTable(BaseState state) {
-		if( _table == null ) {
-			_table = state.getHTable(HBaseConstant.USER_SESSION_TABLE);
-		}
-		return _table;
-	}
-	private void returnSessionTable(BaseState state) {
-		if( _table != null ) {
-			state.returnHTable(_table);
-			_table = null;
-		}
 	}
 
 	private void processLogin(Pipeline pipe,UserActionEvent ev) {

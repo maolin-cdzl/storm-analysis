@@ -42,7 +42,6 @@ public class CompanyUserLoadState extends BaseState implements IUserLoadReportRe
 	private LinkedList<Put>								_records;
 
 	public CompanyUserLoadState() {
-		super(null,null);
 		_companys = new HashMap<String,UserLoadRecorder>();
 		_gson = TopologyConstant.createStdGson();
 		_reports = new LinkedList<Values>();

@@ -43,8 +43,6 @@ public class ServerSpeakLoadState extends BaseState implements ISpeakLoadReportR
 	private LinkedList<Values>							_reports;
 
 	public ServerSpeakLoadState() {
-		super(null,null);
-		
 		_serverLoads = new HashMap<String,SpeakLoadRecorder>();
 		_gson = TopologyConstant.createStdGson();
 		_reports = new LinkedList<Values>();

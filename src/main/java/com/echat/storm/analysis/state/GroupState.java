@@ -61,16 +61,9 @@ public class GroupState extends BaseState {
 	private static final Logger logger = LoggerFactory.getLogger(GroupState.class);
 
 	static public class Factory implements StateFactory {
-		private RedisConfig _redisConfig;
-		private HBaseConfig _hbaseConfig;
-
-		public Factory(RedisConfig redisConf,HBaseConfig hbaseConf) {
-			_redisConfig = redisConf;
-			_hbaseConfig = hbaseConf;
-		}
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new GroupState(_redisConfig,_hbaseConfig);
+			return new GroupState();
 		}
 	}
 
@@ -84,9 +77,7 @@ public class GroupState extends BaseState {
 	private HashMap<String,GroupRuntimeInfo>				_groupLeft;
 	private Gson											_gson;
 
-	public GroupState(RedisConfig rc,HBaseConfig hc) {
-		super(rc,hc);
-
+	public GroupState() {
 		_userTimeline = new TimelineUtil(10000);
 		_groupTimeline = new TimelineUtil(10000);
 		_speakingBuilders = new LRUHashMap<String,SpeakingRecord.Builder>(10000);

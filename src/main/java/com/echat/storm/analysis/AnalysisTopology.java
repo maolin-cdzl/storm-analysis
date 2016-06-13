@@ -61,13 +61,13 @@ public class AnalysisTopology {
 			.partitionBy(new Fields(FieldConstant.UID_FIELD))
 			.each(
 				CompleteOrganizationByUID.getInputFields(),
-				new CompleteOrganizationByUID(RedisConfig.defaultConfig()),
+				new CompleteOrganizationByUID(),
 				CompleteOrganizationByUID.getOutputFields())
 			.project(UserActionEvent.getFields());
 		
 		// persist user action event to hbase
 		actionStream.partitionPersist(
-				new BaseState.Factory().withHBase(HBaseConfig.defaultConfig()),
+				new BaseState.Factory(),
 				UserActionEvent.getFields(),
 				new UserActionHBaseUpdater());
 
@@ -75,7 +75,7 @@ public class AnalysisTopology {
 				new Fields(FieldConstant.EVENT_FIELD),
 				new EventFilter(EventConstant.getOnlineEvents()))
 			.partitionPersist(
-				new UserOnlineState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
+				new UserOnlineState.Factory(),
 				UserActionEvent.getFields(),
 				new UserOnlineStateUpdater(),
 				UserOnlineEvent.getFields())
@@ -104,12 +104,12 @@ public class AnalysisTopology {
 				new Fields(FieldConstant.GID_FIELD))
 			.each(
 				CompleteGroupEvent.getInputFields(),
-				new CompleteGroupEvent(RedisConfig.defaultConfig()),
+				new CompleteGroupEvent(),
 				CompleteGroupEvent.getOutputFields())
 			.project(GroupEvent.getFields());
 		
 		Stream groupReportStream = groupStream.partitionPersist(
-				new GroupState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
+				new GroupState.Factory(),
 				GroupEvent.getFields(),
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())

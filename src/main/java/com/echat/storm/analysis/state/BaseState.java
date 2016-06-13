@@ -31,61 +31,39 @@ public class BaseState implements State {
 
     @Override
     public void beginCommit(Long txid) {
-		logger.info("beginCommit txid: " + txid.toString());
+		logger.info(this.getClass().getName() + " beginCommit txid: " + txid.toString());
     }
 
     @Override
     public void commit(Long txid) {
-		logger.info("commit txid: " + txid.toString());
+		logger.info(this.getClass().getName() + " commit txid: " + txid.toString());
     }
 
     static public class Factory implements StateFactory {
-        private RedisConfig _redisConfig = null;
-		private HBaseConfig _hbaseConfig = null;
-
-		public Factory withJedis(RedisConfig conf) {
-			_redisConfig = conf;
-			return this;
-		}
-
-		public Factory withHBase(HBaseConfig conf) {
-			_hbaseConfig = conf;
-			return this;
-		}
-
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-            return new BaseState(_redisConfig,_hbaseConfig);
+            return new BaseState();
         }
     }
 
     private JedisPool jedisPool;
-	private HBaseConfig hbaseCustomConfig;
 	private Configuration hbaseConfiguration;
 	private HConnection hbaseConnection;
 
-    public BaseState(RedisConfig redisConf,HBaseConfig hbaseConf) {
-		if( redisConf != null ) {
-			jedisPool = new JedisPool(DEFAULT_POOL_CONFIG,redisConf.host,redisConf.port);
-		}
-		if( hbaseConf != null ) {
-			hbaseCustomConfig = hbaseConf;
-			hbaseConfiguration = HBaseConfiguration.create();
-			hbaseConnection = null;
-		}
+    public BaseState() {
+		jedisPool = null;
+		hbaseConfiguration = HBaseConfiguration.create();
+		hbaseConnection = null;
     }
 
     public Jedis getJedis() {
 		if( jedisPool == null ) {
-			throw new RuntimeException("Did not setup jedis configure");
+			jedisPool = new JedisPool(DEFAULT_POOL_CONFIG,RedisConfig.HOST,RedisConfig.PORT);
 		}
         return jedisPool.getResource();
     }
 
     public void returnJedis(Jedis jedis) {
-		if( jedisPool == null ) {
-			throw new RuntimeException("Did not setup jedis configure");
-		}
         jedis.close();
     }
 
@@ -94,10 +72,6 @@ public class BaseState implements State {
 	}
 
 	public HTableInterface getHTable(final String tableName) {
-		if( hbaseConfiguration == null ) {
-			throw new RuntimeException("Did not setup hbase configure");
-		}
-
 		HTableInterface table = null;
 		try {
 			if( hbaseConnection == null ) {
@@ -113,7 +87,7 @@ public class BaseState implements State {
 					hbaseConnection = null;
 				}
 			}
-			logger.error(e.getMessage());
+			logger.error("when create HTable: ",e);
 			return null;
 		}
 		return table;
@@ -133,7 +107,7 @@ public class BaseState implements State {
 					hbaseConnection = null;
 				}
 			}
-			logger.error(e.getMessage());
+			logger.error("when close HTable: ",e);
 		}
 	}
 }

@@ -46,8 +46,6 @@ public class CompanySpeakLoadState extends BaseState implements ISpeakLoadReport
 	private LinkedList<Put>								_records;
 
 	public CompanySpeakLoadState() {
-		super(null,null);
-		
 		_companyLoads = new HashMap<String,SpeakLoadRecorder>();
 		_gson = TopologyConstant.createStdGson();
 		_reports = new LinkedList<Values>();

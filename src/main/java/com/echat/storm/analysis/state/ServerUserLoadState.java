@@ -39,7 +39,6 @@ public class ServerUserLoadState extends BaseState implements IUserLoadReportRec
 	private Gson										gson;
 
 	public ServerUserLoadState() {
-		super(null,null);
 		_servers = new HashMap<String,UserLoadRecorder>();
 		reports = new LinkedList<Values>();
 		gson = TopologyConstant.createStdGson();

@@ -108,23 +108,40 @@ public class AnalysisTopology {
 				CompleteGroupEvent.getOutputFields())
 			.project(GroupEvent.getFields());
 		
-		Stream groupReportStream = groupStream.partitionPersist(
+		Stream serverGroupLoadStream = groupStream.partitionPersist(
 				new GroupState.Factory(),
 				GroupEvent.getFields(),
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())
 			.newValuesStream();
 
-		Stream serverSpeakLoadStream = groupStream.each(
+		Stream speakEventStream = groupStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
-				new EventFilter(EventConstant.getGroupSpeakEvents()))
-			.partitionPersist(
+				new EventFilter(EventConstant.getGroupSpeakEvents()));
+
+		Stream serverSpeakLoadStream = speakEventStream.partitionPersist(
 				new ServerSpeakLoadState.Factory(),
 				GroupEvent.getFields(),
 				new ServerSpeakLoadStateUpdater(),
 				TimeBucketReport.getFields())
 			.newValuesStream();
 
+		Stream companySpeakLoadStream = speakEventStream
+			.partitionBy(new Fields(FieldConstant.GROUP_COMPANY_FIELD))
+			.partitionPersist(
+					new CompanySpeakLoadState.Factory(),
+					GroupEvent.getFields(),
+					new CompanySpeakLoadStateUpdater(),
+					TimeBucketReport.getFields())
+			.newValuesStream();
+
+		topology
+			.merge(serverUserLoadStream,serverGroupLoadStream,serverSpeakLoadStream)
+			.global()
+			.partitionPersist(
+					new ServerLoadState.Factory(),
+					TimeBucketReport.getFields(),
+					new ServerLoadStateUpdater());
 
 		/*
 		// store to hbase

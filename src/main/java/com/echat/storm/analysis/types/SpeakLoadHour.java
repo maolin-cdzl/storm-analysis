@@ -17,5 +17,22 @@ public class SpeakLoadHour {
 	public int					dentUsers;			// 有多少用户抢麦失败
 	public int					dentGroups;			// 有多少群组发生过抢麦失败
 
+
+	public SpeakLoadHour merge(final SpeakLoadHour other) {
+		speakingSeconds += other.speakingSeconds;
+		speakingTimes += other.speakingTimes;
+		speakingUsers += other.speakingUsers;
+		speakingGroups += other.speakingGroups;
+		lostAutoTimes += other.lostAutoTimes;
+		lostAutoUsers += other.lostAutoUsers;
+		lostAutoGroups += other.lostAutoGroups;
+		lostReplaceTimes += other.lostReplaceTimes;
+		lostReplaceUsers += other.lostReplaceUsers;
+		lostReplaceGroups += other.lostReplaceGroups;
+		dentTimes += other.dentTimes;
+		dentUsers += other.dentUsers;
+		dentGroups += other.dentGroups;
+		return this;
+	}
 }
 

@@ -2,6 +2,7 @@ package com.echat.storm.analysis.types;
 
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import backtype.storm.tuple.ITuple;
 
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.TopologyConstant;
@@ -11,7 +12,6 @@ public class TimeBucketReport {
 	public String				entity;
 	public String				type;
 	public String				bucket;
-
 	public String				report;
 
 	static public Fields getFields() {
@@ -29,6 +29,15 @@ public class TimeBucketReport {
 			TopologyConstant.formatDatetime(bucket),
 			content
 		);
+	}
+
+	static public TimeBucketReport fromTuple(ITuple tuple) {
+		TimeBucketReport report = new TimeBucketReport();
+		report.entity = tuple.getString(0);
+		report.type = tuple.getString(1);
+		report.bucket = tuple.getString(2);
+		report.report = tuple.getString(3);
+		return report;
 	}
 
 	static public byte[] rowKey(final String entity,long bucket) {

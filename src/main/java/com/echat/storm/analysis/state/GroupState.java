@@ -277,7 +277,7 @@ public class GroupState extends BaseState {
 		List<GroupReportResponse> reportResponse = new LinkedList<GroupReportResponse>();
 		final Set<String> servers = _timelineServer.keySet();
 		for(final String server : servers) {
-			long ts = TopologyConstant.toMinuteBucket(_timelineServer.get(server).time);
+			long ts = TopologyConstant.toSecondBucket(_timelineServer.get(server).time);
 			Long lastReport =  _serverLastReport.get(server);
 			if( lastReport == null || lastReport < ts ) {
 				lastReport = ts;

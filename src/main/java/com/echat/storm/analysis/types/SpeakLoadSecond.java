@@ -6,5 +6,15 @@ public class SpeakLoadSecond {
 	public int						lostAutoTimes;		// 被服务器摘麦的次数
 	public int						lostReplaceTimes;	// 被抢麦的次数
 	public int						dentTimes;			// 被拒绝的话权申请次数
+
+	public SpeakLoadSecond merge(final SpeakLoadSecond other) {
+		speakings += other.speakings;
+		getTimes += other.getTimes;
+		lostAutoTimes += other.lostAutoTimes;
+		lostReplaceTimes += other.lostReplaceTimes;
+		dentTimes += other.dentTimes;
+
+		return this;
+	}
 }
 

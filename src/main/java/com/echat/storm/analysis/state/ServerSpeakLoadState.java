@@ -27,14 +27,14 @@ import com.echat.storm.analysis.utils.*;
 
 
 public class ServerSpeakLoadState extends BaseState implements ISpeakLoadReportReceiver {
-	private static final Logger logger = LoggerFactory.getLogger(SpeakState.class);
+	private static final Logger logger = LoggerFactory.getLogger(ServerSpeakLoadState.class);
 
 	static public class Factory implements StateFactory {
 		public Factory(){
 		}
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new SpeakState();
+			return new ServerSpeakLoadState();
 		}
 	}
 
@@ -50,19 +50,19 @@ public class ServerSpeakLoadState extends BaseState implements ISpeakLoadReportR
 		_reports = new LinkedList<Values>();
 	}
 
-	public void getMic(final Server,long timestamp,final String gid,final String uid) {
+	public void getMic(final String server,long timestamp,final String gid,final String uid) {
 		getRecorder(server).getMic(timestamp,gid,uid);
 	}
-	public void releaseMic(final Server,long timestamp,final String gid,final String uid) {
+	public void releaseMic(final String server,long timestamp,final String gid,final String uid) {
 		getRecorder(server).releaseMic(timestamp,gid,uid);
 	}
-	public void lostMicAuto(final Server,long timestamp,final String gid,final String uid) {
+	public void lostMicAuto(final String server,long timestamp,final String gid,final String uid) {
 		getRecorder(server).lostMicAuto(timestamp,gid,uid);
 	}
-	public void lostMicReplace(final Server,long timestamp,final String gid,final String uid) {
+	public void lostMicReplace(final String server,long timestamp,final String gid,final String uid) {
 		getRecorder(server).lostMicReplace(timestamp,gid,uid);
 	}
-	public void dentMic(long timestamp,final String gid,final String uid) {
+	public void dentMic(final String server,long timestamp,final String gid,final String uid) {
 		getRecorder(server).dentMic(timestamp,gid,uid);
 	}
 

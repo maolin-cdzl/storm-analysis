@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.IOException;
 
 import backtype.storm.tuple.Values;
 import backtype.storm.task.IMetricsContext;
@@ -14,6 +15,9 @@ import storm.trident.state.StateFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
+
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.HTableInterface;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -71,10 +75,10 @@ public class GroupState extends BaseState {
 	}
 
 
-	private TimelineUtil<>									_userTimeline;
-	private TimelineUtil<>									_groupTimeline;
+	private TimelineUtil									_userTimeline;
+	private TimelineUtil									_groupTimeline;
 	private LRUHashMap<String,SpeakingRecord.Builder>		_speakingBuilders;
-	private TimelineUtil<>									_timelineServer;
+	private TimelineUtil									_timelineServer;
 	private HashMap<String,Long>							_serverLastReport;
 	private HashMap<String,GroupRuntimeInfo>				_groupJoined;
 	private HashMap<String,GroupRuntimeInfo>				_groupLeft;
@@ -83,10 +87,10 @@ public class GroupState extends BaseState {
 	public GroupState(RedisConfig rc,HBaseConfig hc) {
 		super(rc,hc);
 
-		_userTimeline = new TimelineUtil<>(10000);
-		_groupTimeline = new TimelineUtil<>(10000);
+		_userTimeline = new TimelineUtil(10000);
+		_groupTimeline = new TimelineUtil(10000);
 		_speakingBuilders = new LRUHashMap<String,SpeakingRecord.Builder>(10000);
-		_timelineServer = new TimelineUtil<>(100);
+		_timelineServer = new TimelineUtil(100);
 		_serverLastReport = new HashMap<String,Long>();
 		_groupJoined = new HashMap<String,GroupRuntimeInfo>();
 		_groupLeft = new HashMap<String,GroupRuntimeInfo>();
@@ -125,7 +129,7 @@ public class GroupState extends BaseState {
 			}
 			processJoinedGroup(pipe);
 			List<MemberCountResponse> ress = processLeftGroup(pipe);
-			List<GroupReportResponse> reportResponse = checkReport();
+			List<GroupReportResponse> reportResponse = checkReport(pipe);
 			pipe.sync();
 			
 			if( ress != null ) {
@@ -150,16 +154,16 @@ public class GroupState extends BaseState {
 		if( _userTimeline.update(ev.uid,ev.getTimeStamp(),null) ) {
 			final String groupId = ev.getGroupFullId();
 			if( ValueConstant.GROUP_TYPE_NORMAL.equals(ev.group_type) ) {
-				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,groupID);
-				pipe.sadd(RedisConstant.GROUP_PREFIX + groupID + RedisConstant.USER_SUFFIX,ev.uid);
+				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,groupId);
+				pipe.sadd(RedisConstant.GROUP_PREFIX + groupId + RedisConstant.USER_SUFFIX,ev.uid);
 
-				_groupJoined.put(groupID,new GroupRuntimeInfo(false,ev.server,groupID,ev.group_company));
+				_groupJoined.put(groupId,new GroupRuntimeInfo(false,ev.server,groupId,ev.group_company));
 			} else if( ValueConstant.GROUP_TYPE_TEMP.equals(ev.group_type) ) {
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,groupId);
-				pipe.sadd(RedisConstant.TEMP_GROUP_PREFIX + groupID + RedisConstant.USER_SUFFIX,ev.uid);
-				pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + groupID + RedisConstant.USER_SUFFIX,TopologyConstant.HOUR_SECONDS);
+				pipe.sadd(RedisConstant.TEMP_GROUP_PREFIX + groupId + RedisConstant.USER_SUFFIX,ev.uid);
+				pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + groupId + RedisConstant.USER_SUFFIX,TopologyConstant.HOUR_SECONDS);
 
-				_groupJoined.put(groupID,new GroupRuntimeInfo(true,ev.server,groupID,ev.group_company));
+				_groupJoined.put(groupId,new GroupRuntimeInfo(true,ev.server,groupId,ev.group_company));
 			} else {
 				logger.error("Unknown group type: " + ev.group_type);
 			}
@@ -171,15 +175,15 @@ public class GroupState extends BaseState {
 			final String groupId = ev.getGroupFullId();
 			if( ValueConstant.GROUP_TYPE_NORMAL.equals(ev.group_type) ) {
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,"0");
-				pipe.srem(RedisConstant.GROUP_PREFIX + groupID + RedisConstant.USER_SUFFIX,ev.uid);
+				pipe.srem(RedisConstant.GROUP_PREFIX + groupId + RedisConstant.USER_SUFFIX,ev.uid);
 
 				_groupLeft.put(groupId,new GroupRuntimeInfo(false,ev.server,groupId,ev.group_company));
 			} else if( ValueConstant.GROUP_TYPE_TEMP.equals(ev.group_type) ) {
 				pipe.set(RedisConstant.USER_PREFIX + ev.uid + RedisConstant.GROUP_SUFFIX,"0");
-				pipe.srem(RedisConstant.TEMP_GROUP_PREFIX + groupID + RedisConstant.USER_SUFFIX,ev.uid);
-				pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + groupID + RedisConstant.USER_SUFFIX,TopologyConstant.HOUR_SECONDS);
+				pipe.srem(RedisConstant.TEMP_GROUP_PREFIX + groupId + RedisConstant.USER_SUFFIX,ev.uid);
+				pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + groupId + RedisConstant.USER_SUFFIX,TopologyConstant.HOUR_SECONDS);
 				
-				_groupLeft.put(groupID,new GroupRuntimeInfo(true,ev.server,groupID,ev.group_company));
+				_groupLeft.put(groupId,new GroupRuntimeInfo(true,ev.server,groupId,ev.group_company));
 			} else {
 				logger.error("Unknown group type: " + ev.group_type);
 			}
@@ -218,12 +222,12 @@ public class GroupState extends BaseState {
 					pipe.sadd(RedisConstant.SERVER_PREFIX + c.server + RedisConstant.TEMP_GROUP_SUFFIX,c.gid);
 					pipe.sadd(RedisConstant.TEMP_GROUP_PREFIX + c.gid + RedisConstant.SERVER_SUFFIX, c.server);
 					pipe.expire(RedisConstant.TEMP_GROUP_PREFIX + c.gid + RedisConstant.SERVER_SUFFIX,TopologyConstant.HOUR_SECONDS);
-					pipe.sadd(RedisConstant.COMPANY_PREFIX + c.group_company + RedisConstant.TEMP_GROUP_SUFFIX,c.gid);
+					pipe.sadd(RedisConstant.COMPANY_PREFIX + c.company + RedisConstant.TEMP_GROUP_SUFFIX,c.gid);
 				} else {
 					pipe.sadd(RedisConstant.ONLINE_GROUP_KEY,c.gid);
 					pipe.sadd(RedisConstant.SERVER_PREFIX + c.server + RedisConstant.GROUP_SUFFIX,c.gid);
 					pipe.sadd(RedisConstant.GROUP_PREFIX + c.gid + RedisConstant.SERVER_SUFFIX, c.server);
-					pipe.sadd(RedisConstant.COMPANY_PREFIX + c.group_company + RedisConstant.GROUP_SUFFIX,c.gid);
+					pipe.sadd(RedisConstant.COMPANY_PREFIX + c.company + RedisConstant.GROUP_SUFFIX,c.gid);
 				}
 			}
 			_groupJoined.clear();
@@ -278,9 +282,10 @@ public class GroupState extends BaseState {
 		}
 	}
 
-	private List<GroupReportResponse> checkReport() {
+	private List<GroupReportResponse> checkReport(Pipeline pipe) {
 		List<GroupReportResponse> reportResponse = new LinkedList<GroupReportResponse>();
-		for(String server : _timelineServer.keySet()) {
+		final Set<String> servers = _timelineServer.keySet();
+		for(final String server : servers) {
 			long ts = TopologyConstant.toMinuteBucket(_timelineServer.get(server).time);
 			Long lastReport =  _serverLastReport.get(server);
 			if( lastReport == null || lastReport < ts ) {
@@ -323,7 +328,7 @@ public class GroupState extends BaseState {
 		List<Put> tgRows = new LinkedList<Put>();
 		for(SpeakingRecord s : speakings) {
 			if( ValueConstant.GROUP_TYPE_TEMP.equals(s.group_type) ) {
-				tgRow.add( s.toTempRow() );
+				tgRows.add( s.toTempRow() );
 			} else {
 				gRows.add( s.toRow() );
 			}
@@ -359,7 +364,7 @@ public class GroupState extends BaseState {
 					logger.error("Error performing put temp group speaking to HBase.", e);
 				} finally {
 					if( table != null ) {
-						state.returnHTable(table);
+						returnHTable(table);
 					}
 				}
 			} else {

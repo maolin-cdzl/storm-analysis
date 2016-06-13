@@ -30,7 +30,7 @@ public class ServerSpeakLoadStateUpdater extends BaseStateUpdater<ServerSpeakLoa
 
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
-		super(conf,context);
+		super.prepare(conf,context);
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import backtype.storm.tuple.ITuple;
 import org.apache.hadoop.hbase.client.Put;
 
 import com.echat.storm.analysis.constant.*;
+import com.echat.storm.analysis.utils.BytesUtil;
 
 public class GroupEvent {
 	public String server;
@@ -84,7 +85,7 @@ public class GroupEvent {
 	}
 
 	public String getGroupFullId() {
-		if( ValueConstant.GROUP_TYPE_TEMP.equals(type) ) {
+		if( ValueConstant.GROUP_TYPE_TEMP.equals(group_type) ) {
 			return server + ":" + gid;
 		} else {
 			return gid;
@@ -110,7 +111,7 @@ public class GroupEvent {
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_UID,uid.getBytes());
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_COMPANY,company.getBytes());
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GID,gid.getBytes());
-		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_TYPE,type.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_TYPE,group_type.getBytes());
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_COMPANY,group_company.getBytes());
 
 		if( agent != null ) {

@@ -55,7 +55,7 @@ public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 		List<Put> tgRows = new LinkedList<Put>();
 		for(GroupEvent ev : events) {
 			if( ValueConstant.GROUP_TYPE_TEMP.equals(ev.group_type) ) {
-				tgRow.add( ev.toTempRow() );
+				tgRows.add( ev.toTempRow() );
 			} else {
 				gRows.add( ev.toRow() );
 			}

@@ -38,14 +38,14 @@ public class SpeakingRecord {
 				record = makeRecord(ev);
 			}
 			_uid = ev.uid;
-			_user_company = ev.user_company;
-			_user_agent = ev.user_agent;
+			_user_company = ev.company;
+			_user_agent = ev.agent;
 			_start_speak = ev.datetime;
 			return record;
 		}
 
 		public SpeakingRecord stopSpeak(final GroupEvent ev) {
-			if( _uid == null || ! _uid.equals(ev._uid) ) {
+			if( _uid == null || ! _uid.equals(ev.uid) ) {
 				reset();
 				return null;
 			}
@@ -78,7 +78,7 @@ public class SpeakingRecord {
 		}
 	}
 
-	static Builder createBuilder(final GroupEvent ev) {
+	static public Builder createBuilder(final GroupEvent ev) {
 		return new Builder(ev);
 	}
 
@@ -99,16 +99,16 @@ public class SpeakingRecord {
 	private transient long endTs = 0;
 
 	public Date getStartDate() {
-		return TopologyConstant.parseDatetime(login);
+		return TopologyConstant.parseDatetime(start_time);
 	}
 	public long getStartTimeStamp() {
 		if( startTs == 0 ) {
-			startTs = getLoginDate().getTime();
+			startTs = getStartDate().getTime();
 		}
 		return startTs;
 	}
 	public Date getEndDate() {
-		return TopologyConstant.parseDatetime(logout);
+		return TopologyConstant.parseDatetime(end_time);
 	}
 	public long getEndTimeStamp() {
 		if( endTs == 0 ) {
@@ -149,10 +149,10 @@ public class SpeakingRecord {
 		return BytesUtil.concatBytes(companyPart,startPart,endPart,uidPart,gidPart);
 	}
 
-	public void toRow(Put put) {
+	public void toRow(Put row) {
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_SERVER,server.getBytes());
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GID,gid.getBytes());
-		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_TYPE,type.getBytes());
+		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_TYPE,group_type.getBytes());
 		row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_COMPANY,group_company.getBytes());
 		if( group_agent != null ) {
 			row.add(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_GROUP_AGENT,group_agent.getBytes());

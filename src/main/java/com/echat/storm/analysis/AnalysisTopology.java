@@ -109,7 +109,7 @@ public class AnalysisTopology {
 			.project(GroupEvent.getFields());
 		
 		Stream groupReportStream = groupStream.partitionPersist(
-				new GroupState.Factory(RedisConfig.defaultConfig()),
+				new GroupState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
 				GroupEvent.getFields(),
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())

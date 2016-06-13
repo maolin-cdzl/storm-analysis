@@ -9,5 +9,8 @@ public class ValueConstant {
 	public static final String REPORT_USER_LOAD_HOUR = "report-uload-hour";
 
 	public static final String REPORT_GROUP_LOAD_SECOND = "report-gload-sec";
+
+	public static final String REPORT_SPEAKING_LOAD_SECOND = "report-speak-sec";
+	public static final String REPORT_SPEAKING_LOAD_HOUR = "report-speak-hour";
 }
 

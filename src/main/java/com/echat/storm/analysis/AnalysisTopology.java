@@ -108,23 +108,20 @@ public class AnalysisTopology {
 				CompleteGroupEvent.getOutputFields())
 			.project(GroupEvent.getFields());
 		
-		Stream groupReportStream = groupStream.each(
-				new Fields(FieldConstant.EVENT_FIELD),
-				new EventFilter(EventConstant.getGroupInOutEvents()))
-			.partitionPersist(
+		Stream groupReportStream = groupStream.partitionPersist(
 				new GroupState.Factory(RedisConfig.defaultConfig()),
 				GroupEvent.getFields(),
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())
 			.newValuesStream();
 
-		Stream speakReportStream = groupStream.each(
+		Stream serverSpeakLoadStream = groupStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
 				new EventFilter(EventConstant.getGroupSpeakEvents()))
 			.partitionPersist(
-				new SpeakState.Factory(RedisConfig.defaultConfig(),HBaseConfig.defaultConfig()),
+				new ServerSpeakLoadState.Factory(),
 				GroupEvent.getFields(),
-				new SpeakStateUpdater(),
+				new ServerSpeakLoadStateUpdater(),
 				TimeBucketReport.getFields())
 			.newValuesStream();
 

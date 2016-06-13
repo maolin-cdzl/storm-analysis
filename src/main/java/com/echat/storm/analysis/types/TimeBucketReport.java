@@ -5,6 +5,7 @@ import backtype.storm.tuple.Values;
 
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.TopologyConstant;
+import com.echat.storm.analysis.utils.BytesUtil;
 
 public class TimeBucketReport {
 	public String				entity;
@@ -28,6 +29,12 @@ public class TimeBucketReport {
 			TopologyConstant.formatDatetime(bucket),
 			content
 		);
+	}
+
+	static public byte[] rowKey(final String entity,long bucket) {
+		byte[] entityPart = BytesUtil.stringToHashBytes(entity);
+		byte[] bucketPart = BytesUtil.longToBytes(bucket);
+		return BytesUtil.concatBytes(entityPart,bucketPart);
 	}
 
 	public Values toValues() {

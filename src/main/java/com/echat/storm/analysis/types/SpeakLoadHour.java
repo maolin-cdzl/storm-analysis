@@ -1,5 +1,7 @@
 package com.echat.storm.analysis.types;
 
+import org.apache.hadoop.hbase.client.Put;
+
 public class SpeakLoadHour {
 	public long					speakingSeconds;	// 发言总时长
 	public int					speakingTimes;		// 一小时一共有多少发言
@@ -14,5 +16,6 @@ public class SpeakLoadHour {
 	public int					dentTimes;			// 一共多少次抢麦失败
 	public int					dentUsers;			// 有多少用户抢麦失败
 	public int					dentGroups;			// 有多少群组发生过抢麦失败
+
 }
 

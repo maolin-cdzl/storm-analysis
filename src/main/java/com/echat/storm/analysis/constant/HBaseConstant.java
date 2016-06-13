@@ -18,6 +18,10 @@ public class HBaseConstant {
 	// speaking table
 	public static final String GROUP_SPEAKING_TABLE = "group_speaking";
 	public static final String TEMP_GROUP_SPEAKING_TABLE = "temp_group_speaking";
+
+	// server & company speak load table
+	public static final String SERVER_SPEAK_LOAD_TABLE = "server_speak_load";
+	public static final String COMPANY_SPEAK_LOAD_TABLE = "company_speak_load";
 	
 
 	// columns
@@ -51,5 +55,8 @@ public class HBaseConstant {
 	public static final byte[] COLUMN_GROUP_TYPE = FieldConstant.GROUP_TYPE_FIELD.getBytes();
 	public static final byte[] COLUMN_GROUP_COMPANY = FieldConstant.GROUP_COMPANY_FIELD.getBytes();
 	public static final byte[] COLUMN_GROUP_AGENT = FieldConstant.GROUP_AGENT_FIELD.getBytes();
+
+
+	public static final byte[] COLUMN_REPORT = FieldConstant.REPORT_FIELD.getBytes();
 }
 

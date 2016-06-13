@@ -13,7 +13,7 @@ public class BytesUtil implements Serializable {
 		return buffer.array();
 	}
 
-	static public byte[] intToByte(int v) {
+	static public byte[] intToBytes(int v) {
 		ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
 		buffer.putInt(v);
 		return buffer.array();
@@ -24,7 +24,7 @@ public class BytesUtil implements Serializable {
 		if( str != null ) {
 			hash = str.hashCode();
 		}
-		return intToByte(hash);
+		return intToBytes(hash);
 	}
 
 	static public byte[] concatBytes(byte[] ... byteArr) {

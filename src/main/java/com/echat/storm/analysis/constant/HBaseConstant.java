@@ -19,6 +19,10 @@ public class HBaseConstant {
 	public static final String GROUP_SPEAKING_TABLE = "group_speaking";
 	public static final String TEMP_GROUP_SPEAKING_TABLE = "temp_group_speaking";
 
+	// server & company user load table
+	public static final String SERVER_USER_LOAD_TABLE = "server_user_load";
+	public static final String COMPANY_USER_LOAD_TABLE = "company_user_load";
+	
 	// server & company speak load table
 	public static final String SERVER_SPEAK_LOAD_TABLE = "server_speak_load";
 	public static final String COMPANY_SPEAK_LOAD_TABLE = "company_speak_load";

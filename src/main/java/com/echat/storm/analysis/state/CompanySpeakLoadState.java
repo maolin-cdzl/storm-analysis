@@ -51,6 +51,7 @@ public class CompanySpeakLoadState extends BaseState implements ISpeakLoadReport
 		_companyLoads = new HashMap<String,SpeakLoadRecorder>();
 		_gson = TopologyConstant.createStdGson();
 		_reports = new LinkedList<Values>();
+		_records = new LinkedList<Put>();
 	}
 
 	public void getMic(final String company,long timestamp,final String gid,final String uid) {

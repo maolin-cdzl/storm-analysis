@@ -12,6 +12,8 @@ import backtype.storm.task.IMetricsContext;
 import storm.trident.state.State;
 import storm.trident.state.StateFactory;
 
+import org.apache.hadoop.hbase.client.Put;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -35,14 +37,16 @@ public class CompanyUserLoadState extends BaseState implements IUserLoadReportRe
 	}
 
 	private HashMap<String,UserLoadRecorder>			_companys;
-	private LinkedList<Values>							reports;
-	private Gson										gson;
+	private Gson										_gson;
+	private LinkedList<Values>							_reports;
+	private LinkedList<Put>								_records;
 
 	public CompanyUserLoadState() {
 		super(null,null);
 		_companys = new HashMap<String,UserLoadRecorder>();
-		reports = new LinkedList<Values>();
-		gson = TopologyConstant.createStdGson();
+		_gson = TopologyConstant.createStdGson();
+		_reports = new LinkedList<Values>();
+		_records = new LinkedList<Put>();
 	}
 
 
@@ -62,11 +66,21 @@ public class CompanyUserLoadState extends BaseState implements IUserLoadReportRe
 	}
 
 	public List<Values> pollReport() {
-		if( reports.isEmpty() ) {
+		if( _reports.isEmpty() ) {
 			return null;
 		} else {
-			List<Values> r = reports;
-			reports = new LinkedList<Values>();
+			List<Values> r = _reports;
+			_reports = new LinkedList<Values>();
+			return r;
+		}
+	}
+
+	public List<Put> pollRecord() {
+		if( _records.isEmpty() ) {
+			return null;
+		} else {
+			List<Put> r = _records;
+			_records = new LinkedList<Put>();
 			return r;
 		}
 	}
@@ -83,21 +97,25 @@ public class CompanyUserLoadState extends BaseState implements IUserLoadReportRe
 	@Override
 	public void onSecondReport(final String id,long bucket,UserLoadSecond report) {
 		/* not report company second statistic, too many.
-		reports.add(TimeBucketReport.makeReport(
+		_reports.add(TimeBucketReport.makeReport(
 						id,
 						ValueConstant.REPORT_USER_LOAD_SECOND,
 						bucket,
-						gson.toJson(report)));
+						_gson.toJson(report)));
 		*/
 	}
 
 	@Override
 	public void onMinuteReport(final String id,long bucket,UserLoadHour report) {
-		reports.add(TimeBucketReport.makeReport(
+		final String content = _gson.toJson(report);
+		_reports.add(TimeBucketReport.makeReport(
 						id,
 						ValueConstant.REPORT_USER_LOAD_HOUR,
 						bucket,
-						gson.toJson(report)));
+						content));
+		Put row = new Put(TimeBucketReport.rowKey(id,bucket));
+		row.addColumn(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_REPORT,content.getBytes());
+		_records.add(row);
 	}
 }
 

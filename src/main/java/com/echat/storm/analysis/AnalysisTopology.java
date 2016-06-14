@@ -3,8 +3,9 @@ package com.echat.storm.analysis;
 import storm.kafka.ZkHosts;
 import storm.kafka.SpoutConfig;
 import storm.kafka.KafkaSpout;
-//import storm.kafka.trident.TridentKafkaConfig;
-//import storm.kafka.trident.OpaqueTridentKafkaSpout;
+import storm.kafka.trident.TridentKafkaConfig;
+import storm.kafka.trident.OpaqueTridentKafkaSpout;
+import storm.kafka.trident.TransactionalTridentKafkaSpout;
 
 import storm.trident.TridentTopology;
 import storm.trident.TridentState;
@@ -47,26 +48,9 @@ public class AnalysisTopology {
 	private static StormTopology buildTopology() {
 		TridentTopology topology = new TridentTopology();
 
-		// create kafka spout
-		//TridentKafkaConfig spoutConfig = new TridentKafkaConfig(
-		//		new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST), 
-		//		EnvConstant.KAFKA_TOPIC,
-		//		EnvConstant.STORM_KAFKA_ID
-		//		);
-		//
-		SpoutConfig spoutConfig = new SpoutConfig(
-				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST),
-			   	EnvConstant.KAFKA_TOPIC,
-				EnvConstant.STORM_KAFKA_ZK_PARENT,
-				EnvConstant.STORM_KAFKA_ID);
-		//
-		spoutConfig.scheme = new SchemeAsMultiScheme(new PttLogScheme());
-		spoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime(); 
-		spoutConfig.ignoreZkOffsets = false;
 		Stream logStream = topology.newStream(
 				TopologyConstant.KAFKA_PTTSVC_SPOUT,
-				//new OpaqueTridentKafkaSpout(spoutConfig))
-				new KafkaSpout(spoutConfig))
+				createKafkaSpout())
 			.partitionBy(new Fields(FieldConstant.SERVER_FIELD));
 			//.parallelismHint(EnvConstant.KAFKA_TOPIC_PARTITION); 
 
@@ -161,6 +145,30 @@ public class AnalysisTopology {
 					new ServerLoadStateUpdater());
 
 		return topology.build();
+	}
+
+	private static TransactionalTridentKafkaSpout createKafkaSpout() {
+		/* storm-core spout
+		SpoutConfig spoutConfig = new SpoutConfig(
+				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST),
+			   	EnvConstant.KAFKA_TOPIC,
+				EnvConstant.STORM_KAFKA_ZK_PARENT,
+				EnvConstant.STORM_KAFKA_ID);
+		*/
+
+		// create kafka spout
+		TridentKafkaConfig spoutConfig = new TridentKafkaConfig(
+				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST), 
+				EnvConstant.KAFKA_TOPIC,
+				EnvConstant.STORM_KAFKA_ID
+				);
+		
+		spoutConfig.scheme = new SchemeAsMultiScheme(new PttLogScheme());
+		spoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime(); 
+		spoutConfig.ignoreZkOffsets = false;
+		//return new KafkaSpout(spoutConfig);
+		//return new OpaqueTridentKafkaSpout(spoutConfig);
+		return new TransactionalTridentKafkaSpout(spoutConfig);
 	}
 
 	private static void createBasicTable(HBaseAdmin admin,final String tableName) throws IOException {

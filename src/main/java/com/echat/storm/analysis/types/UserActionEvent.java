@@ -69,9 +69,9 @@ public class UserActionEvent {
 		log.datetime = tuple.getString(1);
 		log.event = tuple.getString(2);
 		log.uid = tuple.getString(3);
-		log.gid = tuple.getString(4);
-		log.company = tuple.getString(5);
-		log.agent = tuple.getString(6);
+		log.company = tuple.getString(4);
+		log.agent = tuple.getString(5);
+		log.gid = tuple.getString(6);
 		log.ctx = tuple.getString(7);
 		log.ip = tuple.getString(8);
 		log.device = tuple.getString(9);

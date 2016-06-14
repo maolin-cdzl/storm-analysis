@@ -122,6 +122,7 @@ public class CompleteGroupEvent extends BaseFunction {
 		if( ti == null ) {
 			ti = new TimedOrganizationInfo();
 			ti.expired = 0;
+			ti.info = new OrganizationInfo();
 			ti.info.company = company;
 			ti.info.agent = agent;
 			cache.put(key,ti);

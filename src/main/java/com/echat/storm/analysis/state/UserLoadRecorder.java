@@ -66,7 +66,11 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 		timeoutedOnlines.put(uid);
 		timeoutedLogins.put(uid,timeout);
 		UserLoadRecord record = secondSliding.get(bucket);
-		record.logins.add(uid);
+		if( record != null ) {
+			record.logins.add(uid);
+		} else {
+			logger.warn(uid + " login event timeout: " + TopologyConstant.formatDatetime(timestamp));
+		}
 	}
 
 	public void logout(long timestamp,final String uid) {
@@ -76,7 +80,11 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 		timeoutedOnlines.put(uid,timeout);
 		timeoutedLogouts.put(uid,timeout);
 		UserLoadRecord record = secondSliding.get(bucket);
-		record.logouts.add(uid);
+		if( record != null ) {
+			record.logouts.add(uid);
+		} else {
+			logger.warn(uid + " logout event timeout: " + TopologyConstant.formatDatetime(timestamp));
+		}
 	}
 
 	public void broken(long timestamp,final String uid) {
@@ -85,7 +93,11 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 
 		timeoutedBrokens.put(uid,timeout);
 		UserLoadRecord record = secondSliding.get(bucket);
-		record.brokens.add(uid);
+		if( record != null ) {
+			record.brokens.add(uid);
+		} else {
+			logger.warn(uid + " broken event timeout: " + TopologyConstant.formatDatetime(timestamp));
+		}
 	}
 
 	@Override

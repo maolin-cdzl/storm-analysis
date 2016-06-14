@@ -1,8 +1,10 @@
 package com.echat.storm.analysis;
 
 import storm.kafka.ZkHosts;
-import storm.kafka.trident.TridentKafkaConfig;
-import storm.kafka.trident.OpaqueTridentKafkaSpout;
+import storm.kafka.SpoutConfig;
+import storm.kafka.KafkaSpout;
+//import storm.kafka.trident.TridentKafkaConfig;
+//import storm.kafka.trident.OpaqueTridentKafkaSpout;
 
 import storm.trident.TridentTopology;
 import storm.trident.TridentState;
@@ -46,17 +48,25 @@ public class AnalysisTopology {
 		TridentTopology topology = new TridentTopology();
 
 		// create kafka spout
-		TridentKafkaConfig spoutConf = new TridentKafkaConfig(
-				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST), 
-				EnvConstant.KAFKA_TOPIC,
-				EnvConstant.KAFKA_ID
-				);
-		spoutConf.scheme = new SchemeAsMultiScheme(new PttLogScheme());
-		spoutConf.startOffsetTime = kafka.api.OffsetRequest.LatestTime(); 
-		spoutConf.ignoreZkOffsets = false;
+		//TridentKafkaConfig spoutConfig = new TridentKafkaConfig(
+		//		new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST), 
+		//		EnvConstant.KAFKA_TOPIC,
+		//		EnvConstant.STORM_KAFKA_ID
+		//		);
+		//
+		SpoutConfig spoutConfig = new SpoutConfig(
+				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST),
+			   	EnvConstant.KAFKA_TOPIC,
+				EnvConstant.STORM_KAFKA_ZK_PARENT,
+				EnvConstant.STORM_KAFKA_ID);
+		//
+		spoutConfig.scheme = new SchemeAsMultiScheme(new PttLogScheme());
+		spoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime(); 
+		spoutConfig.ignoreZkOffsets = false;
 		Stream logStream = topology.newStream(
 				TopologyConstant.KAFKA_PTTSVC_SPOUT,
-				new OpaqueTridentKafkaSpout(spoutConf))
+				//new OpaqueTridentKafkaSpout(spoutConfig))
+				new KafkaSpout(spoutConfig))
 			.partitionBy(new Fields(FieldConstant.SERVER_FIELD));
 			//.parallelismHint(EnvConstant.KAFKA_TOPIC_PARTITION); 
 

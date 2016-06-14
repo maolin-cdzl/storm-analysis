@@ -1,9 +1,10 @@
 package com.echat.storm.analysis.constant;
 
 public class HBaseConstant {
+	public static final byte[] COLUMN_FAMILY_LOG = "l".getBytes();
+
 	// user action table
 	public static final String USER_ACTION_TABLE = "user_action";
-	public static final byte[] COLUMN_FAMILY_LOG = "l".getBytes();
 
 	// user online session table
 	public static final String USER_SESSION_TABLE = "user_session";

@@ -21,10 +21,18 @@ import backtype.storm.generated.AuthorizationException;
 import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.generated.StormTopology;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HColumnDescriptor;  
+import org.apache.hadoop.hbase.HTableDescriptor; 
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.HBaseAdmin; 
+import org.apache.hadoop.hbase.MasterNotRunningException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.io.IOException;
 
 import com.echat.storm.analysis.constant.*;
 import com.echat.storm.analysis.types.*;
@@ -143,90 +151,16 @@ public class AnalysisTopology {
 					TimeBucketReport.getFields(),
 					new ServerLoadStateUpdater());
 
-		/*
-		// store to hbase
-		actionStream.partitionPersist(
-				new HBaseStateFactory(new HBaseState.Options()
-					.withTableName(HBaseConstant.USER_ACTION_TABLE)
-					.withMapper(new PttUserActionHBaseMapper())),
-				PttUserActionLog.getFields(),
-				new HBaseUpdater()
-				);
-
-		// update online informations to redis
-		TridentState onlineState = actionStream.each(
-				new Fields(FieldConstant.EVENT_FIELD),
-				new EventFilter(OnlineUpdater.getOnlineEvents())
-				).partitionPersist(
-					new BaseState.Factory(TopologyConstant.REDIS_CONFIG),
-					OnlineEvent.getFields(),
-					new OnlineUpdater(),
-					BrokenEvent.getFields()
-				);
-
-		Stream brokenStream = onlineState.newValuesStream();
-		brokenStream.partitionPersist(
-				new HBaseStateFactory(new HBaseState.Options()
-					.withTableName(HBaseConstant.BROKEN_HISTORY_TABLE)
-					.withMapper(new BrokenEventHBaseMapper())),
-				BrokenEvent.getFields(),
-				new HBaseUpdater()
-				);
-
-		// update group information to redis
-		actionStream.each(
-				new Fields(FieldConstant.EVENT_FIELD),
-				new EventFilter(GroupUpdater.getGroupEvents())
-			)
-			.partitionPersist(
-				new BaseState.Factory(TopologyConstant.REDIS_CONFIG),
-				GroupEvent.getFields(),
-				new GroupUpdater()
-			);
-		
-		// log level count
-		Stream loadStream = topology.merge(
-			logStream.partitionAggregate(
-				new Fields(FieldConstant.SERVER_FIELD,FieldConstant.DATETIME_FIELD,FieldConstant.LEVEL_FIELD),
-				new FieldBucketAggregator(FieldConstant.SERVER_FIELD,FieldConstant.DATETIME_FIELD,FieldConstant.LEVEL_FIELD),
-				new Fields(FieldConstant.SERVER_FIELD,FieldConstant.BUCKET_FIELD,FieldConstant.LOAD_FIELD)),
-			eventStream.partitionAggregate(
-				new Fields(FieldConstant.SERVER_FIELD,FieldConstant.DATETIME_FIELD,FieldConstant.EVENT_FIELD),
-				new FieldBucketAggregator(FieldConstant.SERVER_FIELD,FieldConstant.DATETIME_FIELD,FieldConstant.EVENT_FIELD),
-				new Fields(FieldConstant.SERVER_FIELD,FieldConstant.BUCKET_FIELD,FieldConstant.LOAD_FIELD))
-		);
-
-
-		//log.info("loadStream fields: " + Arrays.toString(loadStream.getOutputFields().toList().toArray()));
-		TridentState loadState = loadStream.groupBy(new Fields(FieldConstant.SERVER_FIELD,FieldConstant.BUCKET_FIELD)).persistentAggregate(
-				ServerLoadState.nonTransactional(TopologyConstant.REDIS_CONFIG),
-				new Fields(FieldConstant.LOAD_FIELD),
-				new ServerLoadAggregator(),
-				new Fields(FieldConstant.SERVER_LOAD_FIELD)
-				);
-
-		onlineStream.partitionPersist(
-				new BaseState.Factory(TopologyConstant.REDIS_CONFIG),
-				new Fields(FieldConstant.SERVER_FIELD,FieldConstant.DEVICE_FIELD),
-				new ServerDevUpdater(),
-				new Fields()
-				);
-
-		TridentState onlineState = onlineStream.partitionPersist(
-				new BaseState.Factory(TopologyConstant.REDIS_CONFIG),
-				onlineStream.getOutputFields(),
-				new OnlineUpdater(),
-				new Fields(FieldConstant.BROKEN_EVENT_FIELD)
-				);
-		*/
 		return topology.build();
 	}
 
-	public static void main(String[] args) throws AlreadyAliveException, InvalidTopologyException, AuthorizationException,InterruptedException {
+	public static void main(String[] args) throws IOException,AlreadyAliveException, InvalidTopologyException, AuthorizationException,InterruptedException {
 		if( args == null || args.length < 1 ) {
 			System.out.println("need cluster or local args");
 			return;
 		}
+
+		createHTables();
 
 		Config conf = new Config();
 		String name = AnalysisTopology.class.getSimpleName();
@@ -248,6 +182,46 @@ public class AnalysisTopology {
 			cluster.shutdown();
 		}
 
+	}
+
+	private static void createBasicTable(HBaseAdmin admin,final String tableName) throws IOException {
+		try {
+			if( ! admin.tableExists(tableName) ) {
+				HTableDescriptor tableDesc = new HTableDescriptor(TableName.valueOf(tableName));
+				tableDesc.addFamily(new HColumnDescriptor(HBaseConstant.COLUMN_FAMILY_LOG));
+				admin.createTable(tableDesc);
+			}
+		} catch( IOException e ) {
+			logger.error("Can not create htable: " + tableName,e);
+			throw e;
+		}
+	}
+
+	private static void createHTables() throws IOException,MasterNotRunningException  {
+		Configuration conf = HBaseConfiguration.create();
+		HBaseAdmin admin = null;
+		
+		try {
+			admin = new HBaseAdmin(conf);
+			createBasicTable(admin,HBaseConstant.USER_ACTION_TABLE);
+			createBasicTable(admin,HBaseConstant.USER_SESSION_TABLE);
+			createBasicTable(admin,HBaseConstant.BROKEN_HISTORY_TABLE);
+			createBasicTable(admin,HBaseConstant.GROUP_EVENT_TABLE);
+			createBasicTable(admin,HBaseConstant.TEMP_GROUP_EVENT_TABLE);
+			createBasicTable(admin,HBaseConstant.GROUP_SPEAKING_TABLE);
+			createBasicTable(admin,HBaseConstant.TEMP_GROUP_SPEAKING_TABLE);
+			createBasicTable(admin,HBaseConstant.SERVER_USER_LOAD_TABLE);
+			createBasicTable(admin,HBaseConstant.COMPANY_USER_LOAD_TABLE);
+			createBasicTable(admin,HBaseConstant.SERVER_SPEAK_LOAD_TABLE);
+			createBasicTable(admin,HBaseConstant.COMPANY_SPEAK_LOAD_TABLE);
+		} catch( MasterNotRunningException e ) {
+			logger.error("HBase master not running",e);
+			throw e;
+		} finally {
+			if( admin != null ) {
+				admin.close();
+			}
+		}
 	}
 }
 

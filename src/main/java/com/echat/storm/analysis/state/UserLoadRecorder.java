@@ -107,7 +107,7 @@ public class UserLoadRecorder implements ITimeBucketSlidingWindowCallback<UserLo
 
 	@Override
 	public void onSlidingOut(long bucket,UserLoadRecord val) {
-		logger.info(id + " sliding out: " + bucket);
+		logger.info(id + " sliding out: " + TopologyConstant.formatDatetime(bucket));
 
 		// update current online user set
 		for(String uid : val.logins) {

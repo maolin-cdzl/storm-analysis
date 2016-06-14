@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 import com.echat.storm.analysis.constant.FieldConstant;
+import com.echat.storm.analysis.constant.TopologyConstant;
 import com.echat.storm.analysis.types.RedisConfig;
 import com.echat.storm.analysis.utils.LRUHashMap;
 
@@ -41,6 +42,8 @@ public class CompleteOrganizationByUID extends BaseFunction {
 		return new Fields(FieldConstant.COMPANY_FIELD,FieldConstant.AGENT_FIELD);
 	}
 
+	private long _count = 0;
+	private long _lastLog = 0;
     private Jedis jedis;
 	private LRUHashMap<String,TimedOrganizationInfo> cache;
 	
@@ -52,6 +55,17 @@ public class CompleteOrganizationByUID extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
+		if( TopologyConstant.DEBUG ) {
+			final long now = System.currentTimeMillis();
+			_count += 1;
+			if( _lastLog == 0 ) {
+				_lastLog = now;
+			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
+				logger.info("Process " + _count + " in millis " + (now - _lastLog));
+				_lastLog = now;
+				_count = 0;
+			}
+		}
 		final String uid = tuple.getString(0);
 		final OrganizationInfo info = search(uid);
 		if( info != null ) {

@@ -194,10 +194,12 @@ public class ServerLoadState extends BaseState {
 	}
 
 	private void onSecondReport(final String server,long bucket,ServerLoadSecond report) {
+		final String key = "appload-" + server;
+		logger.info(key + " publish at: " + TopologyConstant.formatDatetime(bucket));
 		final String content = _gson.toJson(report);
 		Jedis jedis = getJedis();
 		if( jedis != null ) {
-			jedis.publish("server-load-" + server,content);
+			jedis.publish("appload-" + server,content);
 			returnJedis(jedis);
 		}
 	}

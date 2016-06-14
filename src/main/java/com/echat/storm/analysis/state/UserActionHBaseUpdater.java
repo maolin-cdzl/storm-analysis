@@ -35,8 +35,22 @@ import com.echat.storm.analysis.utils.*;
 public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 	private static final Logger logger = LoggerFactory.getLogger(UserActionHBaseUpdater.class);
 
+	private long _count = 0;
+	private long _lastLog = 0;
+
 	@Override
 	public void updateState(BaseState state, List<TridentTuple> inputs,TridentCollector collector) {
+		if( TopologyConstant.DEBUG ) {
+			final long now = System.currentTimeMillis();
+			_count += inputs.size();
+			if( _lastLog == 0 ) {
+				_lastLog = now;
+			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
+				logger.info("Process " + _count + " in millis " + (now - _lastLog));
+				_lastLog = now;
+				_count = 0;
+			}
+		}
 		List<Put> puts = new ArrayList<Put>();
 
 		for(TridentTuple tuple : inputs) {

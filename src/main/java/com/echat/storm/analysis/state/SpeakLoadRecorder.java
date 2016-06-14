@@ -144,7 +144,7 @@ public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<Speak
 	}
 	@Override
 	public void onSlidingOut(long bucket,SpeakLoadRecord val) {
-		logger.info(id + " sliding out: " + bucket);
+		logger.info(id + " sliding out: " + TopologyConstant.formatDatetime(bucket));
 
 		SpeakLoadSecond report = new SpeakLoadSecond();
 		report.speakings = speakings.values().size();

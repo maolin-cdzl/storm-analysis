@@ -16,6 +16,7 @@ import java.util.Map;
 
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.ValueConstant;
+import com.echat.storm.analysis.constant.TopologyConstant;
 import com.echat.storm.analysis.types.RedisConfig;
 import com.echat.storm.analysis.utils.LRUHashMap;
 
@@ -49,6 +50,9 @@ public class CompleteGroupEvent extends BaseFunction {
 				FieldConstant.GROUP_AGENT_FIELD);
 	}
 
+	private long _count = 0;
+	private long _lastLog = 0;
+
     private Jedis jedis;
 	private LRUHashMap<String,TimedOrganizationInfo> cache;
 
@@ -60,6 +64,17 @@ public class CompleteGroupEvent extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
+		if( TopologyConstant.DEBUG ) {
+			final long now = System.currentTimeMillis();
+			_count += 1;
+			if( _lastLog == 0 ) {
+				_lastLog = now;
+			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
+				logger.info("Process " + _count + " in millis " + (now - _lastLog));
+				_lastLog = now;
+				_count = 0;
+			}
+		}
 		final String gid = tuple.getString(0);
 		final String type = getGroupType(gid);
 		if( type == null ) {

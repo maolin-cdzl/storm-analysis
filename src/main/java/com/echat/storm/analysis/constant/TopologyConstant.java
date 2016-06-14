@@ -10,6 +10,7 @@ import com.echat.storm.analysis.types.RedisConfig;
 public class TopologyConstant {
 	// debug
 	public static final boolean DEBUG = true;
+	public static final long LOG_REPORT_PERIOD = 10000;	// 10 second
 
 	// datetime string format
 	public static final String[] INPUT_DATETIME_FORMAT = new String[] { 

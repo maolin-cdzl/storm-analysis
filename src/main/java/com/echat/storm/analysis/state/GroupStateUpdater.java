@@ -38,6 +38,9 @@ import com.echat.storm.analysis.utils.*;
 public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 	private static final Logger logger = LoggerFactory.getLogger(GroupStateUpdater.class);
 
+	private long _count = 0;
+	private long _lastLog = 0;
+
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
 		super.prepare(conf,context);
@@ -45,6 +48,17 @@ public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 
 	@Override
 	public void updateState(GroupState state, List<TridentTuple> inputs,TridentCollector collector) {
+		if( TopologyConstant.DEBUG ) {
+			final long now = System.currentTimeMillis();
+			_count += inputs.size();
+			if( _lastLog == 0 ) {
+				_lastLog = now;
+			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
+				logger.info("Process " + _count + " in millis " + (now - _lastLog));
+				_lastLog = now;
+				_count = 0;
+			}
+		}
 		logger.info("updateState, input tuple count: " + inputs.size());
 
 		List<GroupEvent> events = new LinkedList<GroupEvent>();

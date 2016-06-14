@@ -130,6 +130,9 @@ public class PttLogScheme implements Scheme {
 
 	static private HashMap<String,EventParser> EVENT_PARSER_MAP = createEventParserMap();
 
+	private long _count = 0L;
+	private long _lastLog = 0L;
+
 	private Pattern _basePattern = null;
 	private PatternMatcher _pm = null;
 	private GetKeyValues _getKv = null;
@@ -163,6 +166,18 @@ public class PttLogScheme implements Scheme {
 
 	@Override
 	public List<Object> deserialize(byte[] bytes) {
+		if( TopologyConstant.DEBUG ) {
+			final long now = System.currentTimeMillis();
+			_count += 1;
+			if( _lastLog == 0 ) {
+				_lastLog = now;
+			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
+				logger.info("Process " + _count + " in millis " + (now - _lastLog));
+				_lastLog = now;
+				_count = 0;
+			}
+		}
+		
 		String line = null;
 		try {
 			line = new String(bytes,"UTF-8");

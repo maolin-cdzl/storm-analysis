@@ -1,4 +1,4 @@
-package com.echat.storm.analysis.operation;
+package com.echat.storm.analysis.utils;
 
 import java.io.Serializable;
 import org.slf4j.Logger;

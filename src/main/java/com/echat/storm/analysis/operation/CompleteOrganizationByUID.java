@@ -18,6 +18,7 @@ import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.TopologyConstant;
 import com.echat.storm.analysis.types.RedisConfig;
 import com.echat.storm.analysis.utils.LRUHashMap;
+import com.echat.storm.analysis.utils.DebugCounter;
 
 public class CompleteOrganizationByUID extends BaseFunction {
 	private static final Logger logger = LoggerFactory.getLogger(CompleteOrganizationByUID.class);

@@ -24,7 +24,7 @@ public class GetKeyValues {
 		}
 	}
 
-	public Map<String,String> getKeys(String content) {
+	public Map<String,String> getKeys(final String content) {
 		Map<String,String> keys = new HashMap<String,String>();
 		PatternMatcher pm = new Perl5Matcher();
 		PatternMatcherInput matcherInput = new PatternMatcherInput(content);  

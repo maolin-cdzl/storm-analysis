@@ -130,18 +130,30 @@ public class PttLogScheme implements Scheme {
 
 	static private HashMap<String,EventParser> EVENT_PARSER_MAP = createEventParserMap();
 
-	private Pattern basePattern = null;
-	private PatternMatcher pm = null;
-	private GetKeyValues reg = null;
+	private Pattern _basePattern = null;
+	private PatternMatcher _pm = null;
+	private GetKeyValues _getKv = null;
 
-	public PttLogScheme() {
-		PatternCompiler compiler = new Perl5Compiler();
-		try {
-			this.basePattern = compiler.compile(BASE_PATTERN);
-		} catch( MalformedPatternException e ) {
+	private MatchResult regexMatch(final String content) {
+		if( _pm == null ) {
+			PatternCompiler compiler = new Perl5Compiler();
+			try {
+				_basePattern = compiler.compile(BASE_PATTERN);
+			} catch( MalformedPatternException e ) {
+			}
+			_pm = new Perl5Matcher();
 		}
-		pm = new Perl5Matcher();
-		reg = new GetKeyValues();
+		if( _pm.contains(content,_basePattern) ) {
+			return _pm.getMatch();
+		}
+		return null;
+	}
+
+	private Map<String,String> getKeyValues(final String content) {
+		if( _getKv == null ) {
+			_getKv = new GetKeyValues();
+		}
+		return _getKv.getKeys(content);
 	}
 
 	@Override
@@ -166,7 +178,7 @@ public class PttLogScheme implements Scheme {
 		if( log.event != null ) {
 			EventParser p = EVENT_PARSER_MAP.get(log.event);
 			if( p != null ) {
-				Map<String,String> keys = reg.getKeys(log.content);
+				Map<String,String> keys = getKeyValues(log.content);
 				if( ! p.parse(log,keys) ) {
 					return null;
 				}
@@ -176,8 +188,8 @@ public class PttLogScheme implements Scheme {
 	}
 
 	private boolean baseParse(PttSvcLog log,String line) {
-		if( pm.contains(line,basePattern) ) {
-			MatchResult mr = pm.getMatch();
+		MatchResult mr = regexMatch(line);
+		if( mr != null ) {
 			log.server = mr.group(1);
 
 			// because current log time has no milliseconds!

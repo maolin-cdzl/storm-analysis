@@ -5,13 +5,14 @@ import backtype.storm.tuple.Fields;
 import storm.trident.tuple.TridentTuple;
 import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
+import storm.trident.operation.TridentOperationContext;
 
 import redis.clients.jedis.Jedis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.Map;
 
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.constant.ValueConstant;

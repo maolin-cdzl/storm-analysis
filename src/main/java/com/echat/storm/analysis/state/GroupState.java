@@ -108,7 +108,8 @@ public class GroupState extends BaseState {
 					if( record != null ) {
 						speakings.add(record);
 					}
-				} else if( EventConstant.EVENT_LOSTMIC_AUTO.equals(ev.event)
+				} else if( EventConstant.EVENT_RELEASE_MIC.equals(ev.event)
+						|| EventConstant.EVENT_LOSTMIC_AUTO.equals(ev.event)
 						|| EventConstant.EVENT_LOSTMIC_REPLACE.equals(ev.event) ) {
 					SpeakingRecord record = stopSpeak(ev);
 					if( record != null ) {

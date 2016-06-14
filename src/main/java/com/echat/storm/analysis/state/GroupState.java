@@ -275,8 +275,8 @@ public class GroupState extends BaseState {
 
 	private List<GroupReportResponse> checkReport(Pipeline pipe) {
 		List<GroupReportResponse> reportResponse = new LinkedList<GroupReportResponse>();
-		final Set<String> servers = _timelineServer.keySet();
-		for(final String server : servers) {
+		Set<String> servers = _timelineServer.keySet();
+		for(String server : servers) {
 			long ts = TopologyConstant.toSecondBucket(_timelineServer.get(server).time);
 			Long lastReport =  _serverLastReport.get(server);
 			if( lastReport == null || lastReport < ts ) {

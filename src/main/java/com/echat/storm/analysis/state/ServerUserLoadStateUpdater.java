@@ -37,6 +37,7 @@ public class ServerUserLoadStateUpdater extends BaseStateUpdater<ServerUserLoadS
 	@Override
 	public void updateState(ServerUserLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 		for(TridentTuple tuple : inputs) {
 			UserOnlineEvent ev = UserOnlineEvent.fromTuple(tuple);
 			if( EventConstant.EVENT_USER_ONLINE.equals(ev.event) ) {

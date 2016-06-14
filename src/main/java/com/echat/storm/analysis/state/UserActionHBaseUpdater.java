@@ -39,6 +39,7 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 	@Override
 	public void updateState(BaseState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 		List<Put> puts = new ArrayList<Put>();
 
 		for(TridentTuple tuple : inputs) {

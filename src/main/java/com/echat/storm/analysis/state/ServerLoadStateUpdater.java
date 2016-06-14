@@ -33,6 +33,7 @@ import com.echat.storm.analysis.utils.*;
 public class ServerLoadStateUpdater extends BaseStateUpdater<ServerLoadState> {
 	private static final Logger logger = LoggerFactory.getLogger(ServerLoadStateUpdater.class);
 
+	private DebugCounter _debug = new DebugCounter();
 	private Gson _gson;
 
 	@Override
@@ -43,6 +44,8 @@ public class ServerLoadStateUpdater extends BaseStateUpdater<ServerLoadState> {
 
 	@Override
 	public void updateState(ServerLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
+		_debug.countIn(logger,inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 		for(TridentTuple tuple : inputs) {
 			TimeBucketReport tbr = TimeBucketReport.fromTuple(tuple);
 			if( ValueConstant.REPORT_USER_LOAD_SECOND.equals(tbr.type) ) {

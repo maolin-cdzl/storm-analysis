@@ -48,7 +48,7 @@ public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 	@Override
 	public void updateState(GroupState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
-		logger.info("updateState, input tuple count: " + inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 
 		List<GroupEvent> events = new LinkedList<GroupEvent>();
 		for(TridentTuple tuple : inputs) {
@@ -109,7 +109,6 @@ public class GroupStateUpdater extends BaseStateUpdater<GroupState> {
 				collector.emit(v);
 			}
 		}
-		logger.info("updateState done, input tuple count: " + inputs.size());
 	}
 }
 

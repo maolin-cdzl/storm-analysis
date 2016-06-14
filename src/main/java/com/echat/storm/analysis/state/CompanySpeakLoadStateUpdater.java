@@ -41,6 +41,7 @@ public class CompanySpeakLoadStateUpdater extends BaseStateUpdater<CompanySpeakL
 	@Override
 	public void updateState(CompanySpeakLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 		for(TridentTuple tuple : inputs) {
 			GroupEvent ev = GroupEvent.fromTuple(tuple);
 			if( EventConstant.EVENT_GET_MIC.equals(ev.event) ) {

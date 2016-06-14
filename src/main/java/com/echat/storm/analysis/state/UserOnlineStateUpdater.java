@@ -73,7 +73,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 	@Override
 	public void updateState(UserOnlineState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
-		logger.info("updateState, input tuple count: " + inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 
 		boolean newServer = false;
 		boolean newDevice = false;

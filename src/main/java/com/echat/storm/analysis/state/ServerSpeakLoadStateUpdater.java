@@ -38,6 +38,7 @@ public class ServerSpeakLoadStateUpdater extends BaseStateUpdater<ServerSpeakLoa
 	@Override
 	public void updateState(ServerSpeakLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
+		logger.info("updateState with tuples: {}",inputs.size());
 		for(TridentTuple tuple : inputs) {
 			GroupEvent ev = GroupEvent.fromTuple(tuple);
 			if( EventConstant.EVENT_GET_MIC.equals(ev.event) ) {

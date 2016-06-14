@@ -92,7 +92,7 @@ public class CompleteOrganizationByUID extends BaseFunction {
 
 	private OrganizationInfo readFromRedis(String uid) {
 		String company = jedis.get("db:user:" + uid + ":company");
-		if( company != null ) {
+		if( company != null && (!company.isEmpty()) ) {
 			OrganizationInfo info = new OrganizationInfo();
 			info.company = company;
 			info.agent = jedis.get("db:company:" + company + ":agent");

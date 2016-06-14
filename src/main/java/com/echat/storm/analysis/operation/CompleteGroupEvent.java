@@ -50,8 +50,7 @@ public class CompleteGroupEvent extends BaseFunction {
 				FieldConstant.GROUP_AGENT_FIELD);
 	}
 
-	private long _count = 0;
-	private long _lastLog = 0;
+	private DebugCounter _debug = new DebugCounter();
 
     private Jedis jedis;
 	private LRUHashMap<String,TimedOrganizationInfo> cache;
@@ -64,17 +63,7 @@ public class CompleteGroupEvent extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		if( TopologyConstant.DEBUG ) {
-			final long now = System.currentTimeMillis();
-			_count += 1;
-			if( _lastLog == 0 ) {
-				_lastLog = now;
-			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
-				logger.info("Process " + _count + " in millis " + (now - _lastLog));
-				_lastLog = now;
-				_count = 0;
-			}
-		}
+		_debug.countIn(logger,1);
 		final String gid = tuple.getString(0);
 		final String type = getGroupType(gid);
 		if( type == null ) {
@@ -87,10 +76,12 @@ public class CompleteGroupEvent extends BaseFunction {
 
 			final OrganizationInfo info = searchTemp(gid,server,company,agent);
 			collector.emit(new Values(type,company,agent));
+			_debug.countOut(logger,1);
 		} else {
 			final OrganizationInfo info = search(gid);
 			if( info != null && info.company != null ) {
 				collector.emit(new Values(type,info.company,info.agent));
+				_debug.countOut(logger,1);
 			} else {
 				logger.warn("Can not found OrganizationInfo for " + gid);
 			}

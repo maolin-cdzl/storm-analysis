@@ -50,8 +50,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 		}
 	}
 
-	private long _count = 0;
-	private long _lastLog = 0;
+	private DebugCounter _debug = new DebugCounter();
 	private Gson									_gson = null;
 	private TimelineUtil<String>					_timeline = null;
 	private HashSet<String>							_servers = null;
@@ -73,17 +72,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 
 	@Override
 	public void updateState(UserOnlineState state, List<TridentTuple> inputs,TridentCollector collector) {
-		if( TopologyConstant.DEBUG ) {
-			final long now = System.currentTimeMillis();
-			_count += inputs.size();
-			if( _lastLog == 0 ) {
-				_lastLog = now;
-			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
-				logger.info("Process " + _count + " in millis " + (now - _lastLog));
-				_lastLog = now;
-				_count = 0;
-			}
-		}
+		_debug.countIn(logger,inputs.size());
 		logger.info("updateState, input tuple count: " + inputs.size());
 
 		boolean newServer = false;
@@ -163,6 +152,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 			state.returnJedis(jedis);
 		}
 
+		_debug.countOut(logger,_emits.size());
 		for(UserOnlineEvent ev : _emits) {
 			collector.emit(ev.toValues());
 		}

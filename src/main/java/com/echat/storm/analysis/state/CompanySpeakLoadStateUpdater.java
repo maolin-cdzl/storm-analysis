@@ -31,8 +31,7 @@ import com.echat.storm.analysis.utils.*;
 public class CompanySpeakLoadStateUpdater extends BaseStateUpdater<CompanySpeakLoadState> {
 	private static final Logger logger = LoggerFactory.getLogger(CompanySpeakLoadStateUpdater.class);
 
-	private long _count = 0;
-	private long _lastLog = 0;
+	private DebugCounter _debug = new DebugCounter();
 
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
@@ -41,17 +40,7 @@ public class CompanySpeakLoadStateUpdater extends BaseStateUpdater<CompanySpeakL
 
 	@Override
 	public void updateState(CompanySpeakLoadState state, List<TridentTuple> inputs,TridentCollector collector) {
-		if( TopologyConstant.DEBUG ) {
-			final long now = System.currentTimeMillis();
-			_count += inputs.size();
-			if( _lastLog == 0 ) {
-				_lastLog = now;
-			} else if( now - _lastLog >= TopologyConstant.LOG_REPORT_PERIOD ) {
-				logger.info("Process " + _count + " in millis " + (now - _lastLog));
-				_lastLog = now;
-				_count = 0;
-			}
-		}
+		_debug.countIn(logger,inputs.size());
 		for(TridentTuple tuple : inputs) {
 			GroupEvent ev = GroupEvent.fromTuple(tuple);
 			if( EventConstant.EVENT_GET_MIC.equals(ev.event) ) {
@@ -71,6 +60,7 @@ public class CompanySpeakLoadStateUpdater extends BaseStateUpdater<CompanySpeakL
 
 		List<Values> reports = state.pollReport();
 		if( reports != null ) {
+			_debug.countOut(logger,reports.size());
 			for(Values v : reports) {
 				collector.emit(v);
 			}

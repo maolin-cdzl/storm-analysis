@@ -43,7 +43,8 @@ public class CompleteOrganizationByUID extends BaseFunction {
     private Jedis jedis;
 	private LRUHashMap<String,TimedOrganizationInfo> cache;
 	
-	public CompleteOrganizationByUID() {
+	@Override
+	public void prepare(Map conf, TridentOperationContext context) {
 		jedis = new Jedis(RedisConfig.HOST,RedisConfig.PORT,RedisConfig.TIMEOUT);
 		cache = new LRUHashMap<String,TimedOrganizationInfo>(MAX_CACHE_COUNT);
 	}

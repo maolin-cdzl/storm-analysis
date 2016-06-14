@@ -50,8 +50,9 @@ public class CompleteGroupEvent extends BaseFunction {
 
     private Jedis jedis;
 	private LRUHashMap<String,TimedOrganizationInfo> cache;
-	
-	public CompleteGroupEvent() {
+
+	@Override
+	public void prepare(Map conf, TridentOperationContext context) {
 		jedis = new Jedis(RedisConfig.HOST,RedisConfig.PORT,RedisConfig.TIMEOUT);
 		cache = new LRUHashMap<String,TimedOrganizationInfo>(MAX_CACHE_COUNT);
 	}

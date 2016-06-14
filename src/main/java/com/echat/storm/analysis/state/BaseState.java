@@ -13,7 +13,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HConnection;
 import org.apache.hadoop.hbase.client.HConnectionManager;
@@ -52,7 +51,7 @@ public class BaseState implements State {
 
     public BaseState() {
 		jedisPool = null;
-		hbaseConfiguration = HBaseConfiguration.create();
+		hbaseConfiguration = HBaseConfig.create();
 		hbaseConnection = null;
     }
 

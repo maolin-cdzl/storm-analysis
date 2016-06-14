@@ -22,7 +22,6 @@ import backtype.storm.spout.SchemeAsMultiScheme;
 import backtype.storm.generated.StormTopology;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;  
 import org.apache.hadoop.hbase.HTableDescriptor; 
 import org.apache.hadoop.hbase.TableName;
@@ -48,7 +47,7 @@ public class AnalysisTopology {
 
 		// create kafka spout
 		TridentKafkaConfig spoutConf = new TridentKafkaConfig(
-				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_LIST), 
+				new ZkHosts(EnvConstant.ZOOKEEPER_HOST_PORT_LIST), 
 				EnvConstant.KAFKA_TOPIC,
 				EnvConstant.KAFKA_ID
 				);
@@ -198,7 +197,7 @@ public class AnalysisTopology {
 	}
 
 	private static void createHTables() throws IOException,MasterNotRunningException  {
-		Configuration conf = HBaseConfiguration.create();
+		Configuration conf = HBaseConfig.create();
 		HBaseAdmin admin = null;
 		
 		try {

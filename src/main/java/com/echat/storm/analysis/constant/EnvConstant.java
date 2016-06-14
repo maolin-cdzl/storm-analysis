@@ -2,7 +2,9 @@ package com.echat.storm.analysis.constant;
 
 public class EnvConstant {
 	// zookeeper
-	public static final String ZOOKEEPER_HOST_LIST = "base001.hdp.echat.com:2181,base002.hdp.echat.com:2181,base003.hdp.echat.com:2181";
+	public static final String ZOOKEEPER_HOST_PORT_LIST = "base001.hdp.echat.com:2181,base002.hdp.echat.com:2181,base003.hdp.echat.com:2181";
+	public static final String ZOOKEEPER_HOST_LIST = "base001.hdp.echat.com,base002.hdp.echat.com,base003.hdp.echat.com";
+	public static final int ZOOKEEPER_PORT = 2181;
 
 	// kafka
 	public static final String KAFKA_ID = "pttsvc";

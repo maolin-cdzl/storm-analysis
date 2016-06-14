@@ -14,5 +14,8 @@ public class EnvConstant {
 	// storm
 	public static final int STORM_MACHINES_NUMBER = 4;
 	public static final int STORM_WORKERS_NUMBER = STORM_MACHINES_NUMBER;
+
+	// hbase
+	public static final String HBASE_ZK_PARENT = "/hbase-unsecure";
 }
 

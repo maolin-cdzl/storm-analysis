@@ -168,7 +168,7 @@ public class AnalysisTopology {
 			conf.setNumWorkers(EnvConstant.STORM_WORKERS_NUMBER);
 			StormSubmitter.submitTopologyWithProgressBar(name, conf, buildTopology());
 		} else if( args[0].equalsIgnoreCase("local") ) {
-			conf.setDebug(true);
+			//conf.setDebug(true);
 			System.out.println("Submit Topology");
 
 			LocalCluster cluster = new LocalCluster();

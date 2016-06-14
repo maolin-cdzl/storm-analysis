@@ -13,6 +13,7 @@ public class HBaseConfig implements Serializable {
 		Configuration conf = HBaseConfiguration.create();
 		conf.set("hbase.zookeeper.quorum",EnvConstant.ZOOKEEPER_HOST_LIST);
 		conf.set("hbase.zookeeper.property.clientPort",Integer.toString(EnvConstant.ZOOKEEPER_PORT));
+		conf.set("zookeeper.znode.parent",EnvConstant.HBASE_ZK_PARENT);
 		return conf;
 	}
 }

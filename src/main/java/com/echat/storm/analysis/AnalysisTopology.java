@@ -57,8 +57,8 @@ public class AnalysisTopology {
 		Stream logStream = topology.newStream(
 				TopologyConstant.KAFKA_PTTSVC_SPOUT,
 				new OpaqueTridentKafkaSpout(spoutConf))
-			.partitionBy(new Fields(FieldConstant.SERVER_FIELD))
-			.parallelismHint(EnvConstant.KAFKA_TOPIC_PARTITION); 
+			.partitionBy(new Fields(FieldConstant.SERVER_FIELD));
+			//.parallelismHint(EnvConstant.KAFKA_TOPIC_PARTITION); 
 
 
 		// setup user action stream

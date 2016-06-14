@@ -52,6 +52,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 
 	private Gson									_gson = null;
 	private TimelineUtil<String>					_timeline = null;
+	private HashSet<String>							_servers = null;
 	private HashSet<String>							_devices = null;
 	private List<UserOnlineEvent>					_emits = null;
 	private List<SessionRecord>						_offlines = null;
@@ -62,6 +63,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 
 		_gson = TopologyConstant.createStdGson();
 		_timeline = new TimelineUtil<String>(50000);
+		_servers = new HashSet<String>();
 		_devices = new HashSet<String>();
 		_emits = new LinkedList<UserOnlineEvent>();
 		_offlines = new LinkedList<SessionRecord>();
@@ -71,7 +73,8 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 	public void updateState(UserOnlineState state, List<TridentTuple> inputs,TridentCollector collector) {
 		logger.info("updateState, input tuple count: " + inputs.size());
 
-		HashSet<String> newDevice = new HashSet<String>();
+		boolean newServer = false;
+		boolean newDevice = false;
 
 		Jedis jedis = null;
 		try {
@@ -80,8 +83,12 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 
 			for(TridentTuple tuple : inputs) {
 				UserActionEvent ev = UserActionEvent.fromTuple(tuple);
+				if( !_servers.contains(ev.server) ) {
+					newServer = true;
+					_servers.add(ev.server);
+				}
 				if( ev.device != null && !_devices.contains(ev.device) ) {
-					newDevice.add(ev.device);
+					newDevice = true;
 					_devices.add(ev.device);
 				}
 				if( EventConstant.EVENT_LOGIN.equals(ev.event) ) {
@@ -96,14 +103,18 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 					logger.error("Unknown event: " + ev.event);
 				}
 			}
-			pipe.sync();
-			
-			if( ! newDevice.isEmpty() ) {
-				for(String device: newDevice) {
+			if( newServer ) {
+				for(String server: _servers ) {
+					pipe.sadd(RedisConstant.SERVER_SET_KEY,server);
+				}
+			}
+			if( newDevice ) {
+				for(String device: _devices ) {
 					pipe.sadd(RedisConstant.DEVICE_SET_KEY,device);
 				}
-				pipe.sync();
 			}
+			pipe.sync();
+			
 
 			if( !_offlines.isEmpty() ) {
 				List<Put> puts = new LinkedList<Put>();

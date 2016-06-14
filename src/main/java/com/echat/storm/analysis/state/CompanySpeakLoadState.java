@@ -99,7 +99,7 @@ public class CompanySpeakLoadState extends BaseState implements ISpeakLoadReport
 
 	@Override
 	public void onSecondReport(final String id,long bucket,SpeakLoadSecond report) {
-		/*
+		/* Don't emit when no one subscribe on it
 		_reports.add(TimeBucketReport.makeReport(
 					id,
 					ValueConstant.REPORT_SPEAKING_LOAD_SECOND,
@@ -111,11 +111,13 @@ public class CompanySpeakLoadState extends BaseState implements ISpeakLoadReport
 	@Override
 	public void onMinuteReport(final String id,long bucket,SpeakLoadHour report) {
 		final String content = _gson.toJson(report);
+		/* Don't emit when no one subscribe on it
 		_reports.add(TimeBucketReport.makeReport(
 					id,
 					ValueConstant.REPORT_SPEAKING_LOAD_HOUR,
 					bucket,
 					content));
+		*/
 
 		Put row = new Put(TimeBucketReport.rowKey(id,bucket));
 		row.addColumn(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_REPORT,content.getBytes());

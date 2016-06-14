@@ -107,11 +107,13 @@ public class CompanyUserLoadState extends BaseState implements IUserLoadReportRe
 	@Override
 	public void onMinuteReport(final String id,long bucket,UserLoadHour report) {
 		final String content = _gson.toJson(report);
+		/* Don't emit when no one subscribe on it
 		_reports.add(TimeBucketReport.makeReport(
 						id,
 						ValueConstant.REPORT_USER_LOAD_HOUR,
 						bucket,
 						content));
+		*/
 		Put row = new Put(TimeBucketReport.rowKey(id,bucket));
 		row.addColumn(HBaseConstant.COLUMN_FAMILY_LOG,HBaseConstant.COLUMN_REPORT,content.getBytes());
 		_records.add(row);

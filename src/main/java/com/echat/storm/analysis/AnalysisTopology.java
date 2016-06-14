@@ -153,36 +153,6 @@ public class AnalysisTopology {
 		return topology.build();
 	}
 
-	public static void main(String[] args) throws IOException,AlreadyAliveException, InvalidTopologyException, AuthorizationException,InterruptedException {
-		if( args == null || args.length < 1 ) {
-			System.out.println("need cluster or local args");
-			return;
-		}
-
-		createHTables();
-
-		Config conf = new Config();
-		String name = AnalysisTopology.class.getSimpleName();
-
-		if( args[0].equalsIgnoreCase("cluster") ) {
-			conf.setNumWorkers(EnvConstant.STORM_WORKERS_NUMBER);
-			StormSubmitter.submitTopologyWithProgressBar(name, conf, buildTopology());
-		} else if( args[0].equalsIgnoreCase("local") ) {
-			//conf.setDebug(true);
-			System.out.println("Submit Topology");
-
-			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology(name, conf,buildTopology());
-
-			System.out.println("Submit successed");
-			Thread.sleep(60000);
-
-			System.out.println("shutdown...");
-			cluster.shutdown();
-		}
-
-	}
-
 	private static void createBasicTable(HBaseAdmin admin,final String tableName) throws IOException {
 		try {
 			if( ! admin.tableExists(tableName) ) {
@@ -222,6 +192,37 @@ public class AnalysisTopology {
 			}
 		}
 	}
+
+	public static void main(String[] args) throws IOException,AlreadyAliveException, InvalidTopologyException, AuthorizationException,InterruptedException {
+		if( args == null || args.length < 1 ) {
+			System.out.println("need cluster or local args");
+			return;
+		}
+
+		createHTables();
+
+		Config conf = new Config();
+		String name = AnalysisTopology.class.getSimpleName();
+
+		if( args[0].equalsIgnoreCase("cluster") ) {
+			conf.setNumWorkers(EnvConstant.STORM_WORKERS_NUMBER);
+			StormSubmitter.submitTopologyWithProgressBar(name, conf, buildTopology());
+		} else if( args[0].equalsIgnoreCase("local") ) {
+			//conf.setDebug(true);
+			System.out.println("Submit Topology");
+
+			LocalCluster cluster = new LocalCluster();
+			cluster.submitTopology(name, conf,buildTopology());
+
+			System.out.println("Submit successed");
+			Thread.sleep(600000); // 10 minutes
+
+			System.out.println("shutdown...");
+			cluster.shutdown();
+		}
+
+	}
+
 }
 
 

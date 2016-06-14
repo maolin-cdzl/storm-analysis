@@ -176,8 +176,8 @@ public class ServerLoadState extends BaseState {
 					onSecondReport(_server,bucket,val);
 				}
 				@Override
-				public void onSkip(long bucket) {
-					onSecondReportMissing(_server,bucket);
+				public void onSkip(long newest,long bucket) {
+					onSecondReportMissing(_server,newest,bucket);
 				}
 			});
 
@@ -186,8 +186,8 @@ public class ServerLoadState extends BaseState {
 		return sliding.get(bucket);
 	}
 
-	private void onSecondReportMissing(final String server,long bucket) {
-		logger.warn(server + " second report missing: " + TopologyConstant.formatDatetime(bucket));
+	private void onSecondReportMissing(final String server,long newest,long bucket) {
+		logger.warn(server + " second report missing: " + TopologyConstant.formatDatetime(bucket) + " newest: " + TopologyConstant.formatDatetime(newest));
 		ServerLoadSecond report = new ServerLoadSecond(server,bucket);
 		// empty reports
 		onSecondReport(server,bucket,report);

@@ -156,8 +156,8 @@ public class SpeakLoadRecorder implements ITimeBucketSlidingWindowCallback<Speak
 		secondReport(bucket,report);
 	}
 	@Override
-	public void onSkip(long bucket) {
-		logger.warn(id + " skip: " + bucket);
+	public void onSkip(long newest,long bucket) {
+		logger.warn(id + " skip: " + TopologyConstant.formatDatetime(bucket) + " newest: " + TopologyConstant.formatDatetime(newest));
 		SpeakLoadSecond report = loadHistory.peekLast();
 		if( report == null ) {
 			report = new SpeakLoadSecond();

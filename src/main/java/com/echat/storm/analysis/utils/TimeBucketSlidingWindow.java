@@ -71,7 +71,7 @@ public class TimeBucketSlidingWindow<T> {
 		// jump too much
 		while( step < start ) {
 			step += _bucketWidth;
-			_callback.onSkip(step);
+			_callback.onSkip(bucket,step);
 		}
 
 		if( ! _timeline.isEmpty() ) {

@@ -57,7 +57,12 @@ public class ServerLoadState extends BaseState {
 	}
 
 	public void reportUserLoadSecond(final String server,long bucket,final UserLoadSecond report) {
-		getSecondReport(server,bucket).userLoad.merge(report);
+		ServerLoadSecond sls = getSecondReport(server,bucket);
+		if( sls != null ) {
+			sls.userLoad.merge(report);
+		} else {
+			logger.warn(server + " UserLoadSecond expired: " + TopologyConstant.formatDatetime(bucket));
+		}
 	}
 
 	public void reportUserLoadHour(final String server,long bucket,final UserLoadHour report) {
@@ -99,11 +104,21 @@ public class ServerLoadState extends BaseState {
 	}
 
 	public void reportGroupLoadSecond(final String server,long bucket,final GroupLoadReport report) {
-		getSecondReport(server,bucket).groupLoad.merge(report);
+		ServerLoadSecond sls = getSecondReport(server,bucket);
+		if( sls != null ) {
+			sls.groupLoad.merge(report);
+		} else {
+			logger.warn(server + " GroupLoadSecond expired: " + TopologyConstant.formatDatetime(bucket));
+		}
 	}
 
 	public void reportSpeakLoadSecond(final String server,long bucket,final SpeakLoadSecond report) {
-		getSecondReport(server,bucket).speakLoad.merge(report);
+		ServerLoadSecond sls = getSecondReport(server,bucket);
+		if( sls != null ) {
+			sls.speakLoad.merge(report);
+		} else {
+			logger.warn(server + " SpeakLoadSecond expired: " + TopologyConstant.formatDatetime(bucket));
+		}
 	}
 
 	public void reportSpeakLoadHour(final String server,long bucket,final SpeakLoadHour report) {

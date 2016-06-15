@@ -37,6 +37,11 @@ public class UserActionHBaseUpdater extends BaseStateUpdater<BaseState> {
 	private DebugCounter _debug = new DebugCounter();
 
 	@Override
+	public void prepare(Map conf,TridentOperationContext context) {
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
+	}
+
+	@Override
 	public void updateState(BaseState state, List<TridentTuple> inputs,TridentCollector collector) {
 		_debug.countIn(logger,inputs.size());
 		logger.info("updateState with tuples: {}",inputs.size());

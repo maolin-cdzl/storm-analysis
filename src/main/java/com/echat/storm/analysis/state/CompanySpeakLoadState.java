@@ -36,6 +36,7 @@ public class CompanySpeakLoadState extends BaseState implements ISpeakLoadReport
 		}
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
+			logger.info("[makeState] partition:{} - {}",partitionIndex,numPartitions);
 			return new CompanySpeakLoadState();
 		}
 	}

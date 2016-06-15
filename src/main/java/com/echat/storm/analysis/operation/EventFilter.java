@@ -2,11 +2,12 @@ package com.echat.storm.analysis.operation;
 
 import storm.trident.tuple.TridentTuple;
 import storm.trident.operation.BaseFilter;
+import storm.trident.operation.TridentOperationContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.Map;
 
 import com.echat.storm.analysis.constant.FieldConstant;
 import com.echat.storm.analysis.utils.DebugCounter;
@@ -22,6 +23,11 @@ public class EventFilter extends BaseFilter {
 
 	public EventFilter(final String[] events) {
 		this.events = events;
+	}
+
+	@Override
+	public void prepare(Map conf, TridentOperationContext context) {
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
 	}
 
 	@Override

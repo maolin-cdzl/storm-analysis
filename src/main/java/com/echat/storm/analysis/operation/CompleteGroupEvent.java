@@ -58,6 +58,7 @@ public class CompleteGroupEvent extends BaseFunction {
 
 	@Override
 	public void prepare(Map conf, TridentOperationContext context) {
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
 		jedis = new Jedis(RedisConfig.HOST,RedisConfig.PORT,RedisConfig.TIMEOUT);
 		cache = new LRUHashMap<String,TimedOrganizationInfo>(MAX_CACHE_COUNT);
 	}

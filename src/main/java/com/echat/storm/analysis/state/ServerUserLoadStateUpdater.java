@@ -32,6 +32,7 @@ public class ServerUserLoadStateUpdater extends BaseStateUpdater<ServerUserLoadS
 
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
 	}
 
 	@Override

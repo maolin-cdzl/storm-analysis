@@ -11,8 +11,9 @@ public class EnvConstant {
 	public static final int KAFKA_TOPIC_PARTITION = 3;
 
 	// storm
-	public static final int STORM_MACHINES_NUMBER = 4;
+	public static final int STORM_MACHINES_NUMBER = 5;
 	public static final int STORM_WORKERS_NUMBER = STORM_MACHINES_NUMBER;
+	public static final int STORM_PARALELISH_HINT = STORM_WORKERS_NUMBER * 1;
 
 	// storm-kafka
 	public static final String STORM_KAFKA_ZK_PARENT = "/" + KAFKA_TOPIC;

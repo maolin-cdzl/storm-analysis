@@ -41,6 +41,7 @@ public class BaseState implements State {
     static public class Factory implements StateFactory {
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
+			logger.info("[makeState] partition:{} - {}",partitionIndex,numPartitions);
             return new BaseState();
         }
     }

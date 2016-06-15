@@ -17,9 +17,12 @@ import com.echat.storm.analysis.types.*;
 import com.echat.storm.analysis.utils.*;
 
 public class UserOnlineState extends BaseState {
+	private static final Logger logger = LoggerFactory.getLogger(UserOnlineState.class);
+
 	static public class Factory implements StateFactory {
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
+			logger.info("[makeState] partition:{} - {}",partitionIndex,numPartitions);
 			return new UserOnlineState();
 		}
 	}

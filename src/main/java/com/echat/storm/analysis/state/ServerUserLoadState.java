@@ -30,6 +30,7 @@ public class ServerUserLoadState extends BaseState implements IUserLoadReportRec
 		}
         @Override
         public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
+			logger.info("[makeState] partition:{} - {}",partitionIndex,numPartitions);
 			return new ServerUserLoadState();
 		}
 	}

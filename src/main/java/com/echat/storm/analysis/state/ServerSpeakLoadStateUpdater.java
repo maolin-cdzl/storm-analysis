@@ -33,6 +33,7 @@ public class ServerSpeakLoadStateUpdater extends BaseStateUpdater<ServerSpeakLoa
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
 		super.prepare(conf,context);
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
 	}
 
 	@Override

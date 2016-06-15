@@ -39,6 +39,7 @@ public class ServerLoadStateUpdater extends BaseStateUpdater<ServerLoadState> {
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
 		super.prepare(conf,context);
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
 		_gson = TopologyConstant.createStdGson();
 	}
 

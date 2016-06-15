@@ -61,6 +61,7 @@ public class UserOnlineStateUpdater extends BaseStateUpdater<UserOnlineState> {
 	@Override
 	public void prepare(Map conf,TridentOperationContext context) {
 		super.prepare(conf,context);
+		logger.info("[prepare] partitionIndex:{}",context.getPartitionIndex());
 
 		_gson = TopologyConstant.createStdGson();
 		_timeline = new TimelineUtil<String>(50000);

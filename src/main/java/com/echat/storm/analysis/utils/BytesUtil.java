@@ -22,7 +22,7 @@ public class BytesUtil implements Serializable {
 	static public byte[] stringToHashBytes(final String str) {
 		int hash = 0;
 		if( str != null ) {
-			hash = str.hashCode();
+			hash = stringHashCode(str);
 		}
 		return intToBytes(hash);
 	}
@@ -52,6 +52,15 @@ public class BytesUtil implements Serializable {
 		}
 		md.reset();
 		return md.digest(uid.getBytes());
+	}
+
+	static public int stringHashCode(final String str) {
+		int hash = 5381;
+		final int strlen = str.length();
+		for(int i=0; i < strlen; i++) {
+			hash = hash * 33 + str.charAt(i);
+		}
+		return hash;
 	}
 
 }

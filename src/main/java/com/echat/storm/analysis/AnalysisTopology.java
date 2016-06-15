@@ -64,13 +64,16 @@ public class AnalysisTopology {
 				CompleteOrganizationByUID.getInputFields(),
 				new CompleteOrganizationByUID(),
 				CompleteOrganizationByUID.getOutputFields())
-			.project(UserActionEvent.getFields());
+			.project(UserActionEvent.getFields())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT); 
 		
 		// persist user action event to hbase
-		actionStream.partitionPersist(
+		actionStream
+			.partitionPersist(
 				new BaseState.Factory(),
 				UserActionEvent.getFields(),
-				new UserActionHBaseUpdater());
+				new UserActionHBaseUpdater())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT); 
 
 		Stream onlineStream = actionStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
@@ -80,6 +83,7 @@ public class AnalysisTopology {
 				UserActionEvent.getFields(),
 				new UserOnlineStateUpdater(),
 				UserOnlineEvent.getFields())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT)
 			.newValuesStream();
 
 		Stream serverUserLoadStream = onlineStream
@@ -88,6 +92,7 @@ public class AnalysisTopology {
 				UserOnlineEvent.getFields(),
 				new ServerUserLoadStateUpdater(),
 				TimeBucketReport.getFields())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT)
 			.newValuesStream();
 
 		onlineStream
@@ -117,6 +122,7 @@ public class AnalysisTopology {
 				GroupEvent.getFields(),
 				new GroupStateUpdater(),
 				TimeBucketReport.getFields())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT)
 			.newValuesStream();
 
 		Stream speakEventStream = groupStream.each(

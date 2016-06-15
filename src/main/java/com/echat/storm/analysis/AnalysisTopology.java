@@ -97,13 +97,12 @@ public class AnalysisTopology {
 
 		onlineStream
 			.partitionBy(new Fields(FieldConstant.COMPANY_FIELD))
-			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT)
 			.partitionPersist(
 				new CompanyUserLoadState.Factory(),
 				UserOnlineEvent.getFields(),
 				new CompanyUserLoadStateUpdater(),
-				TimeBucketReport.getFields()
-			);
+				TimeBucketReport.getFields())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT);
 
 		Stream groupStream = actionStream.each(
 				new Fields(FieldConstant.EVENT_FIELD),
@@ -138,12 +137,12 @@ public class AnalysisTopology {
 
 		speakEventStream
 			.partitionBy(new Fields(FieldConstant.GROUP_COMPANY_FIELD))
-			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT)
 			.partitionPersist(
 					new CompanySpeakLoadState.Factory(),
 					GroupEvent.getFields(),
 					new CompanySpeakLoadStateUpdater(),
-					TimeBucketReport.getFields());
+					TimeBucketReport.getFields())
+			.parallelismHint(EnvConstant.STORM_PARALELISH_HINT);
 
 		topology
 			.merge(serverUserLoadStream,serverGroupLoadStream,serverSpeakLoadStream)
